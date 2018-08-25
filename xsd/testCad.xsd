@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:annotation>
+		<xs:appinfo>TestCAD</xs:appinfo>
+		<xs:documentation xml:lang="en">
+			This Schema defines the elements of a TestCAD Test Project file
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="testProject">
+		<xs:complexType>
+            		<xs:attribute name="projectName" type="xs:string" use="required"/>
+
+			<xs:element name="classificationTree">
+				<xs:complexType>
+					<xs:attribute name="classificationTreeName" type="xs:string" use="required"/>
+
+					<xs:element name="classification">
+						<xs:complexType>
+							<xs:attribute name="id" type="xs:integer" use="required"/>					
+							<xs:attribute name="type" type="xs:integer" use="required"/>
+							<xs:attribute name="xPosition" type="xs:integer" use="required"/>
+							<xs:attribute name="yPosition" type="xs:integer" use="required"/>
+							
+							<xs:element name="labelText">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="constraintsCsv">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="250"/>
+									</xs:restriction>
+								</xs:simpleType>	
+							</xs:element>														
+							<xs:element name="randomShare">
+								<xs:simpleType>
+									<xs:restriction base="xs:decimal">
+										<xs:minInclusive value="0"/>
+										<xs:maxInclusive value="1"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>							
+							<xs:element name="fullCombineWithIdsCsv">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="250"/>
+									</xs:restriction>
+								</xs:simpleType>	
+							</xs:element>
+							
+						</xs:complexType>
+					</xs:element>			
+
+					<xs:element name="arrow">
+						<xs:complexType>
+							<xs:attribute name="id" type="xs:integer" use="required"/>				
+							<xs:attribute name="fromClassId" type="xs:integer" use="required"/>
+							<xs:attribute name="toClassId" type="xs:integer" use="required"/>
+							<xs:element name="labelText">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:complexType>
+					</xs:element>
+
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="stateTransition">
+				<xs:complexType>
+					<xs:attribute name="sequenceName" type="xs:string"/>
+
+					<xs:element name="state">
+						<xs:complexType>
+							<xs:attribute name="shapeType" type="xs:string" use="required"/>
+							<xs:attribute name="xPosition" type="xs:integer" use="required"/>
+							<xs:attribute name="yPosition" type="xs:integer" use="required"/>
+							<xs:element name="labelText">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>				
+						</xs:complexType>
+					</xs:element>
+
+					<xs:element name="transition">
+						<xs:complexType>
+							<xs:attribute name="id" type="xs:integer" use="required"/>
+							<xs:attribute name="fromStateId" type="xs:integer" use="required"/>
+							<xs:attribute name="toStateId" type="xs:integer" use="required"/>
+							<xs:attribute name="fromAnchorPoint" type="xs:integer" use="required"/>
+							<xs:attribute name="toAnchorPoint" type="xs:integer" use="required"/>
+							<xs:element name="labelText">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="transitionTime">
+								<xs:simpleType>
+									<xs:restriction base="xs:integer">
+										<xs:minInclusive value="0"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>				
+						</xs:complexType>
+					</xs:element>
+					
+				</xs:complexType>
+			</xs:element>
+
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>
