@@ -2,9 +2,7 @@
 layout: default
 ---
 
-![testcad](./assets/images/appIcon.png)
-
-Testing is **learning** about a system up to a point where there is enough information about it as to provide an objective criteria upon which to make a decission: _Go or stop_.
+![testcad](./assets/images/appIcon.png) Testing is **learning** about a system up to a point where there is enough information about it as to provide an objective criteria upon which to make a decission: _Go or stop_.
 
 An objective criteria requires **quantitative** data and must have solid grounds to minimize the **risk** of failure because such risk is [always](https://www.testingexcellence.com/seven-principles-of-software-testing/) present.
 
@@ -45,6 +43,10 @@ There are many test design techniques and tools for applying each of them out th
       - Element (Menu choice)
 
 #### Collaborate !
+
+testCAD has been developed with [Open Source Qt](https://www.qt.io/download) you are invited to collaborate with our project we believe your work will make us improve.
+
+testCAD is distributed under the [MIT License](https://choosealicense.com/licenses/mit/). 
 
 ![Branching](https://guides.github.com/activities/hello-world/branching.png)
 
