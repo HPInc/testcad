@@ -46,7 +46,7 @@ There are many test design techniques and tools for applying each of them out th
 
 testCAD has been developed with [Open Source Qt](https://www.qt.io/download) and it is distributed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
-You are invited to collaborate with our project !
+You are invited to collaborate with our project, access our project [here !](https://github.com/bladimirhm/testcad)
 
 ![Branching](https://guides.github.com/activities/hello-world/branching.png)
 
