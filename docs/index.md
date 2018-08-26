@@ -49,4 +49,5 @@ testCAD has been developed with [Open Source Qt](https://www.qt.io/download) you
 testCAD is distributed under the [MIT License](https://choosealicense.com/licenses/mit/). 
 
 ![Branching](https://guides.github.com/activities/hello-world/branching.png)
+![testcad](./assets/images/appIcon.png)
 
