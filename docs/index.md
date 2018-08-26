@@ -44,9 +44,9 @@ There are many test design techniques and tools for applying each of them out th
 
 #### Collaborate !
 
-testCAD has been developed with [Open Source Qt](https://www.qt.io/download) you are invited to collaborate with our project we believe your work will make us improve.
+testCAD has been developed with [Open Source Qt](https://www.qt.io/download) and it is distributed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
-testCAD is distributed under the [MIT License](https://choosealicense.com/licenses/mit/). 
+You are invited to collaborate with our project !
 
 ![Branching](https://guides.github.com/activities/hello-world/branching.png)
 
