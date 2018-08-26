@@ -2,7 +2,7 @@
 layout: default
 ---
 
-![testcad](./assets/images/appIcon.png) Testing is **learning** about a system up to a point where there is enough information about it as to provide an objective criteria upon which to make a decission: _Go or stop_.
+Testing is **learning** about a system up to a point where there is enough information about it as to provide an objective criteria upon which to make a decission: _Go or stop_.
 
 An objective criteria requires **quantitative** data and must have solid grounds to minimize the **risk** of failure because such risk is [always](https://www.testingexcellence.com/seven-principles-of-software-testing/) present.
 
