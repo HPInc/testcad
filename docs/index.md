@@ -16,6 +16,10 @@ Applying test design techniques will not only make us more effective at testing 
 
 There are many test design techniques and tools for applying each of them out there, with testCAD we want to make as much techniques and tools possible closer to the test designer and make their use straight forward and intuitive. 
 
+### Download testCAD for your platform
+
+[Windows](./bin/windows/testCAD6.3.2.zip)
+
 #### Techniques
 
 *   Orthogonal arrays.
