@@ -18,7 +18,7 @@ There are many test design techniques and tools for applying each of them out th
 
 ### Download testCAD for your platform
 
-[Windows](./bin/windows/testCAD6.3.2.zip)
+[![Windows](./assets/images/windows.png)](./bin/windows/testCAD6.3.2.zip)
 
 #### Techniques
 
