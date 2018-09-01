@@ -19,7 +19,7 @@ There are many test design techniques and tools for applying each of them out th
 ### Download testCAD for your platform
 (testCAD binaries are provided for 64 bits platforms only)
 
-[![Windows](./assets/images/windows.png)](./bin/windows/testCAD6.3.2.zip)                        [![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.3.3.zip)
+[![Windows](./assets/images/windows.png)](./bin/windows/testCAD6.3.2.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.3.3.zip)
 
 #### Techniques
 
