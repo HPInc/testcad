@@ -17,8 +17,9 @@ Applying test design techniques will not only make us more effective at testing 
 There are many test design techniques and tools for applying each of them out there, with testCAD we want to make as much techniques and tools possible closer to the test designer and make their use straight forward and intuitive. 
 
 ### Download testCAD for your platform
+(testCAD binaries are provided for 64 bits platforms only)
 
-[![Windows](./assets/images/windows.png)](./bin/windows/testCAD6.3.2.zip)
+[![Windows](./assets/images/windows.png)](./bin/windows/testCAD6.3.2.zip) [![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.3.3.zip)
 
 #### Techniques
 

@@ -14,6 +14,7 @@ TARGET = testCAD
 TEMPLATE = app
 
 CONFIG += c++11
+CONFIG += static
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -73,6 +74,9 @@ TRANSLATIONS    = testCAD_en.ts \
                   testCAD_ca.ts \
                   testCAD_ru.ts
 RESOURCES += \
-    graphics.qrc
+    graphics.qrc \
+    fonts.qrc
 
 RC_FILE = appIcon.rc
+
+DISTFILES +=
