@@ -2,7 +2,8 @@
 layout: default
 ---
 
-**Exhaustive testing** is [impossible](https://www.istqb.org/downloads/send/51-ctfl2018/208-ctfl-2018-syllabus.html). Rather than attempting to test exhaustively, risk analysis, **test techniques**, and priorities should be used to focus test efforts (_ISTQB Syllabus_).
+**Exhaustive testing** is [impossible](https://www.istqb.org/downloads/send/51-ctfl2018/208-ctfl-2018-syllabus.html). Rather than attempting to test exhaustively, risk analysis, **test techniques**, and priorities should be used to focus test efforts.
+(_ISTQB Syllabus_).
 
 #### Do you share our [vision ?](https://www.istqb.org/about-as/vision-mission.html)
 
