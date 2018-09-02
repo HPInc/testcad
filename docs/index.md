@@ -58,17 +58,17 @@ If a test has the design data available it is easy to:
 *  Modify
 *  Update
 
-#### 9. Improve testCAD
+### 9. Improve testCAD
 Nothing is perfect, let us know about a problem or a useful feature that would help to improve testCAD.
 
-**_Your problem is potencially our future problem_** we are interested to know about it!
+**_Your problem is potencially our next problem_** we are interested to know about it!
 
 _Give us some time... testCAD is for free..._
 
 * * *
 
-#### Want to code for testCAD ?
-** Collaborate !
+### Want to code for testCAD ?
+**Collaborate!**
 
 testCAD has been developed with [Open Source Qt](https://www.qt.io/download) and it is distributed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
