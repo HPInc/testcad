@@ -2,51 +2,73 @@
 layout: default
 ---
 
-Testing is **learning** about a system up to a point where there is enough information about it as to provide an objective criteria upon which to make a decission: _Go or stop_.
+**Exhaustive testing** is [impossible](https://www.istqb.org/downloads/send/51-ctfl2018/208-ctfl-2018-syllabus.html). Rather than attempting to test exhaustively, risk analysis, **test techniques**, and priorities should be used to focus test efforts (_ISTQB Syllabus_).
 
-An objective criteria requires **quantitative** data and must have solid grounds to minimize the **risk** of failure because such risk is [always](https://www.testingexcellence.com/seven-principles-of-software-testing/) present.
+#### Do you share our [vision ?](https://www.istqb.org/about-as/vision-mission.html)
 
-### Control your system
-
-Mastering any system requires **time** and usually we don't have that time. Hard learned [lessons](http://www.testingeducation.org/BBST/testdesign/KanerBachPettichord_Lessons_Learned_in_SW_testingCh3-1.pdf) of the past left us with a set of test **design techniques** to get as much information about a system as possible in the shorter time.
-
-### Be effective
-
-Applying test design techniques will not only make us more effective at testing but will also help us _learn from our mistakes_.
-
-There are many test design techniques and tools for applying each of them out there, with testCAD we want to make as much techniques and tools possible closer to the test designer and make their use straight forward and intuitive. 
-
-### Download testCAD for your platform
+### 1. Download testCAD
 
 [![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.3.3.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.3.3.zip)
 
-#### Techniques
+### 2. Picture your system
 
-*   Orthogonal arrays.
-*   State-Transition N-1 switch.
-*   Traceability matrixes.
-
-* * *
-
-#### testCAD UI concept
-
-- Test group
-  - Collection (Just a subset of variables you will use in a combination design)
-  - Combination (Import collections or pick from tree entire branches to combine in several ways)
-  - Sequence (Design your test as a workflow and generate N-1 switch test cases from the diagram)
-  - Cross check (Create a matrix to trace between axes)
 - Component (Part of your system)
   - Module (Menu entry)
     - Module (Sub Menu entry)
-      - Element (Menu choice)
-      - Element (Menu choice)
-      - Element (Menu choice)
+      - Element (Option)
+      - Element (Option)
+      - Element (Option)
     - Module (Sub Menu entry)
-      - Element (Menu choice)
-      - Element (Menu choice)
-      - Element (Menu choice)
+      - Element (Option)
+      - Element (Option)
+      - Element (Option)
 
-#### Collaborate !
+### 3. Explore it
+Once you have a picture of your system, it is easy use the system hierarchical tree to make exploratory charters.
+
+Scan to spot:
+
+*   Pending.
+*   Validated.
+*   Failed.
+*   Needs clarification.
+*   Not supported.
+
+### 4. Measure
+Track your system status and get quantitative data about its state.
+
+### 5. Design tests
+
+*   Orthogonal arrays (_matrixes_).
+*   State-Transition N-1 switch.
+*   Traceability matrixes.
+
+### 6. Generate tests
+Export Orthogonal arrays and State-Transition tests from **testCAD** to html documents.
+
+### 7. Upload tests
+Upload tests **and design files** to a test management platform.
+
+### 8. Maintain (_Review + Transfer + Adapt_) tests
+If a test has the design data available it is easy to:
+
+*  Execute
+*  Find flaws
+*  Transfer
+*  Modify
+*  Update
+
+#### 9. Improve testCAD
+Nothing is perfect, let us know about a problem or a useful feature that would help to improve testCAD.
+
+**_Your problem is potencially our future problem_** we are interested to know about it!
+
+_Give us some time... testCAD is for free..._
+
+* * *
+
+#### Want to code for testCAD ?
+** Collaborate !
 
 testCAD has been developed with [Open Source Qt](https://www.qt.io/download) and it is distributed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
