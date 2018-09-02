@@ -46,7 +46,7 @@ Track your system status and get quantitative data about its state.
 *   Traceability matrixes.
 
 ### 6. Generate tests
-Export Orthogonal arrays and State-Transition tests from **testCAD** to html documents.
+Export tests and data from **testCAD** to html documents.
 
 ### 7. Upload tests
 Upload tests **and design files** to a test management platform.
