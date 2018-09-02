@@ -8,7 +8,9 @@ layout: default
 
 ### 1. Download testCAD
 
+
 [![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.3.3.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.3.3.zip)
+
 
 ### 2. Picture your system
 
