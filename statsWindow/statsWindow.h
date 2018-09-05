@@ -87,6 +87,8 @@ private:
     void writeDataRows();
     bool writeHtmlTo(QString filePath);
 
+    void closeEvent(QCloseEvent *event);
+
 public:
     statsWindow(QWidget *parent = 0, QList<statistics> *treeStatistics = 0);
     void loadStatistics(QList<statistics> *treeStatistics);

@@ -34,6 +34,7 @@ statsWindow::statsWindow(QWidget *parent, QList<statistics> *treeStatistics) : Q
     this->setCentralWidget(table);
     this->setWindowTitle(tr("System Statistics"));
     this->setMinimumSize(500,500);
+    this->setAttribute(Qt::WA_DeleteOnClose);
     createActions();
     createMenus();
     createToolBar();
@@ -245,6 +246,14 @@ bool statsWindow::writeHtmlTo(QString filePath)
 
         return !hasError;
     }
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void statsWindow::closeEvent(QCloseEvent *event)
+{
+    statsWindow::instance = 0;
+    event->accept();
+
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 

@@ -54,7 +54,6 @@ public:
     static connectorProperties variantToConnectorProperties(QVariant connectorPropertiesVariant);
 
     void loadDiagram();
-    void loadDiagram(QTreeWidgetItem *fromTreeItem);
 
     enum exportAs{
         html,

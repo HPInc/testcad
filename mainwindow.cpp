@@ -207,33 +207,37 @@ void MainWindow::showSplashWindow()
 void MainWindow::openDesignerWindow()
 {
     if (clickedItem->data(0, Qt::UserRole).toString() == TAG_TYPE_TEST_COLLECTION){
-        collector = new collectorWindow(this, clickedItem);
-        connect(collector, SIGNAL(saved()), this, SLOT(save()));
-        collector->show();
+
+        if (collectorWindow::instance == 0){
+            collector = new collectorWindow(this, clickedItem);
+            connect(collector, SIGNAL(saved()), this, SLOT(save()));
+            collector->show();
+        }
 
     }else if (clickedItem->data(0, Qt::UserRole).toString() == TAG_TYPE_TEST_COMBINATION){
-        combiner = new combinerWindow(this, clickedItem);
-        connect(combiner, SIGNAL(saved()), this, SLOT(save()));
-        combiner->show();
+
+        if (combinerWindow::instance == 0){
+            combiner = new combinerWindow(this, clickedItem);
+            connect(combiner, SIGNAL(saved()), this, SLOT(save()));
+            combiner->show();
+        }
 
     }else if (clickedItem->data(0, Qt::UserRole).toString() == TAG_TYPE_TEST_SEQUENCE){
 
         if (sequencerWindow::instance == 0){
             sequencer = new sequencerWindow(this, clickedItem);
             connect(sequencer, SIGNAL(saved()), this, SLOT(save()));
-            sequencerWindow::instance = 1;
-
-        }else{
-            sequencer->loadDiagram(clickedItem);
+            sequencer->show();
 
         }
 
-        sequencer->show();
-
     }else if (clickedItem->data(0, Qt::UserRole).toString() == TAG_TYPE_TEST_CROSSCHECK){
-        crossChecker = new crossCheckerWindow(this, clickedItem);
-        connect(crossChecker, SIGNAL(saved()), this, SLOT(save()));
-        crossChecker->show();
+
+        if (crossCheckerWindow::instance == 0){
+            crossChecker = new crossCheckerWindow(this, clickedItem);
+            connect(crossChecker, SIGNAL(saved()), this, SLOT(save()));
+            crossChecker->show();
+        }
 
     }
 
@@ -364,21 +368,40 @@ void MainWindow::createToolbars()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     int decision = notSavedWarningResponse();
+    bool deleteChildren = false;
 
     if(QMessageBox::Save == decision)
     {
         save();
-        hasChanges = false;
+        deleteChildren = true;
 
     }else if(QMessageBox::Ignore == decision)
     {
-        hasChanges = false;
+        deleteChildren = true;
 
     }else if(QMessageBox::Cancel == decision)
     {
         event->ignore();
 
     }
+
+    if (deleteChildren){
+
+        if (collectorWindow::instance != 0)
+            delete(collector);
+
+        if (combinerWindow::instance != 0)
+            delete(combiner);
+
+        if (crossCheckerWindow::instance != 0)
+            delete(crossChecker);
+
+        if (sequencerWindow::instance != 0)
+            delete(sequencer);
+
+        event->accept();
+    }
+
 
 }
 //----------------------------------------------------------------------------------------------------

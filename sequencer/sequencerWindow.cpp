@@ -34,6 +34,8 @@ sequencerWindow::sequencerWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
     this->resize(800,800);
     this->statusBar()->setVisible(true);
     this->setWindowIcon(QIcon(":/icons/sequenceIcon.png"));
+    this->setAttribute(Qt::WA_DeleteOnClose);
+    sequencerWindow::instance = 1;
     treeItem = testItem;
     createActions();
     createMenu();
@@ -492,14 +494,6 @@ bool sequencerWindow::writeTxtTo(QString filePath)
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void sequencerWindow::loadDiagram(QTreeWidgetItem *fromTreeItem)
-{
-    treeItem = fromTreeItem;
-    loadDiagram();
-
-}
-//--------------------------------------------------------------------------------------------------------------------------------
-
 void sequencerWindow::loadDiagram()
 {
     clearDiagram();
@@ -839,6 +833,7 @@ void sequencerWindow::createToolBar()
 
 void sequencerWindow::closeEvent(QCloseEvent *event)
 {
+    bool doClose = false;
 
     if (diagramEditor->Diagram->hasChanged) {
 
@@ -847,17 +842,23 @@ void sequencerWindow::closeEvent(QCloseEvent *event)
 
         if (decission == QMessageBox::Save ){
             storeDiagram();
-            event->accept();
+            doClose = true;
 
         }else if(decission == QMessageBox::Cancel){
             event->ignore();
 
         }else if(decission == QMessageBox::Ignore){
-            event->accept();
+            doClose = true;
 
         }
 
     } else {
+        doClose = true;
+
+    }
+
+    if (doClose){
+        sequencerWindow::instance = 0;
         event->accept();
 
     }

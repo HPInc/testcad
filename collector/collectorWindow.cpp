@@ -36,6 +36,7 @@ collectorWindow::collectorWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
     this->setWindowIcon(QIcon(":/icons/collectionIcon.png"));
     this->resize(800,600);
     this->setMinimumSize(800,600);
+    this->setAttribute(Qt::WA_DeleteOnClose);
     activeTestItem = testItem;
     createActions();
     createMenus();
@@ -44,11 +45,14 @@ collectorWindow::collectorWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
     statusBar()->show();
     hasChanges = false;
     selectedColumn = -1;
+    collectorWindow::instance = 1;
 
 }
 //----------------------------------------------------------------------------------------------------
 
+int collectorWindow::instance = 0;
 QTreeWidgetItem* collectorWindow::clickedItem = 0;
+
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::addColumn()
@@ -377,27 +381,35 @@ bool collectorWindow::writeHtmlTo(QString filePath)
 
 void collectorWindow::closeEvent(QCloseEvent *event)
 {
-    if (hasChanges) {
+    bool doClose = false;
 
+    if (hasChanges) {
         QMessageBox msg(QMessageBox::Warning, tr("Collector"), tr("Collection has unsaved changes"), QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
         int decission = msg.exec();
 
         if (decission == QMessageBox::Save ){
             storeCollection();
-            event->accept();
+            doClose = true;
 
         }else if(decission == QMessageBox::Cancel){
             event->ignore();
 
         }else if(decission == QMessageBox::Ignore){
-            event->accept();
+            doClose = true;
 
         }
 
     } else {
+        doClose = true;
+
+    }
+
+    if (doClose){
+        collectorWindow::instance = 0;
         event->accept();
 
     }
+
 }
 //----------------------------------------------------------------------------------------------------
 

@@ -84,6 +84,7 @@ private:
 
 public:
     explicit crossCheckerWindow(QWidget *parent = 0, QTreeWidgetItem *testItem = 0);
+    static int instance;
     void updateTable();
 
     QAction *shiftUpAction;

@@ -36,6 +36,8 @@ combinerWindow::combinerWindow(QWidget *parent, QTreeWidgetItem *testItem) : QMa
     this->setWindowIcon(QIcon(":/icons/combinationIcon.png"));
     this->resize(800,600);
     this->setMinimumSize(800,600);
+    this->setAttribute(Qt::WA_DeleteOnClose);
+    combinerWindow::instance = 1;
     connect(table,SIGNAL(clicked(QModelIndex)),this,SLOT(calculateOnSelection(QModelIndex)));
     andWithLabel = new QLabel("");
     activeTestItem = testItem;
@@ -52,7 +54,9 @@ combinerWindow::combinerWindow(QWidget *parent, QTreeWidgetItem *testItem) : QMa
 }
 //----------------------------------------------------------------------------------------------------
 
+int combinerWindow::instance = 0;
 QTreeWidgetItem* combinerWindow::clickedItem = 0;
+
 //----------------------------------------------------------------------------------------------------
 
 void combinerWindow::removeCovered()
@@ -513,6 +517,8 @@ bool combinerWindow::writeHtmlTo(QString filePath)
 
 void combinerWindow::closeEvent(QCloseEvent *event)
 {
+    bool doClose = false;
+
     if (hasChanges) {
 
         QMessageBox msg(QMessageBox::Warning, STRING_COMBINER, STRING_DESIGN_HAS_UNSAVED_CHANGES, QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
@@ -520,17 +526,23 @@ void combinerWindow::closeEvent(QCloseEvent *event)
 
         if (decission == QMessageBox::Save ){
             storeCombination();
-            event->accept();
+            doClose = true;
 
         }else if(decission == QMessageBox::Cancel){
             event->ignore();
 
         }else if(decission == QMessageBox::Ignore){
-            event->accept();
+            doClose = true;
 
         }
 
     } else {
+        doClose = true;
+
+    }
+
+    if (doClose){
+        combinerWindow::instance = 0;
         event->accept();
 
     }

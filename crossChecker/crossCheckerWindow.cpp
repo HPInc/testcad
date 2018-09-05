@@ -36,6 +36,8 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
     this->setWindowIcon(QIcon(":/icons/crossCheckerIcon.png"));
     this->resize(900,600);
     this->setMinimumSize(900,600);
+    this->setAttribute(Qt::WA_DeleteOnClose);
+    crossCheckerWindow::instance = 1;
     activeTestItem = testItem;
     createActions();
     createMenus();
@@ -51,7 +53,9 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
 }
 //----------------------------------------------------------------------------------------------------
 
+int crossCheckerWindow::instance = 0;
 QTreeWidgetItem* crossCheckerWindow::clickedItem;
+
 //----------------------------------------------------------------------------------------------------
 
 QList<QStringList> crossCheckerWindow::clickedItemColumns()
@@ -572,6 +576,8 @@ void crossCheckerWindow::pickRowHeadersFromTree()
 
 void crossCheckerWindow::closeEvent(QCloseEvent *event)
 {
+    bool doClose = false;
+
     if (hasChanges) {
 
         QMessageBox msg(QMessageBox::Warning, STRING_CROSS_CHECKER, STRING_DESIGN_HAS_UNSAVED_CHANGES, QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
@@ -579,17 +585,23 @@ void crossCheckerWindow::closeEvent(QCloseEvent *event)
 
         if (decission == QMessageBox::Save ){
             storeChecker();
-            event->accept();
+            doClose = true;
 
         }else if(decission == QMessageBox::Cancel){
             event->ignore();
 
         }else if(decission == QMessageBox::Ignore){
-            event->accept();
+            doClose = true;
 
         }
 
     } else {
+        doClose = true;
+
+    }
+
+    if (doClose){
+        crossCheckerWindow::instance = 0;
         event->accept();
 
     }

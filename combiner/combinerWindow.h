@@ -92,6 +92,7 @@ private:
 
 public:
     explicit combinerWindow(QWidget *parent = 0, QTreeWidgetItem *testItem = 0);
+    static int instance;
     void updateTable();
 
     QAction *andAction;
