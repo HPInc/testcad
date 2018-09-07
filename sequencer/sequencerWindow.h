@@ -78,7 +78,6 @@ private:
     QAction *addFinalStateAction;
     QAction *connectAction;
     QAction *newDiagramAction;
-    QAction *resetZoomAction;
     QAction *deleteSelectedAction;
     QAction *storeDiagramAction;
     QAction *exportAsHtmlAction;
@@ -87,6 +86,7 @@ private:
     QAction *clearDiagramAction;
     QAction *centerDiagramAction;
     QAction *saveImageAction;
+    QAction *findTextAction;
 
     QXmlStreamWriter *xmlWriter;
 
@@ -105,7 +105,6 @@ private:
 private slots:
 
     void newDiagram();
-    void resetZoom();
     void exportHtml();
     void exportTxt();
     void storeDiagram();
@@ -113,6 +112,7 @@ private slots:
     void clearDiagram();
     void centerOnDiagram();
     void saveAsPicture();
+    void findText();
 
 signals:
     void saved();

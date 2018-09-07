@@ -37,6 +37,49 @@ diagram::diagram(QGraphicsView *view, int lastID)
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void diagram::findAndHighlight(QString textToFind)
+{
+    diagramStructure connections;
+    QList<QGraphicsItem*>::iterator it;
+    QList<QGraphicsItem*> allItems = this->items();
+    QGraphicsItem *item;
+    stateShape *shp;
+    connector *cnn;
+    QString strBuff;
+
+    for(it = allItems.begin(); it != allItems.end(); ++it){
+        item = *it;
+        cnn = dynamic_cast<connector*>(item);
+
+        if(cnn){
+            strBuff = cnn->properties.text;
+
+            if (strBuff.contains(textToFind,Qt::CaseInsensitive)){
+                cnn->setHighlighted(true);
+
+            }else{
+                cnn->setHighlighted(false);
+            }
+
+        }else{
+            shp = dynamic_cast<stateShape*>(item);
+
+            if(shp){
+                strBuff = shp->properties.text;
+
+                if (strBuff.contains(textToFind,Qt::CaseInsensitive)){
+                    shp->fillColor = QColor(255,255,0);
+
+                }else{
+                    shp->fillColor = QColor(255,255,255);
+
+                }
+            }
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
 void diagram::loadFromStructure(diagramStructure structure)
 {
     shapeProperties shProps;

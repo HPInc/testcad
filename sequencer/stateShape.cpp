@@ -40,9 +40,16 @@ stateShape::stateShape(QPointF position, int ID, QString text, int shapeType)
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void stateShape::highlight()
+{
+
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
 stateShape::stateShape(shapeProperties values)
 {
     properties = values;
+
     construct();
 }
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +72,7 @@ void stateShape::calculateHookCenters()
 
 void stateShape::construct()
 {
-    this->color = QColor(255,255,255);
+    fillColor = QColor(255,255,255);
     this->setPos(properties.position);
 
     if(properties.shapeType == shapeTypes::State)
@@ -149,7 +156,6 @@ void stateShape::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 {
     Q_UNUSED(widget);
 
-    QColor fillColor = QColor(255,255,255);
     painter->setBrush(QBrush(fillColor));
     painter->setPen(chooseShapePenWhen(option));
 
@@ -184,6 +190,11 @@ QPen stateShape::chooseShapePenWhen(const QStyleOptionGraphicsItem *option)
 
     if (option->state & QStyle::State_Selected){
         pen.setWidth(3);
+
+    }
+
+    if (option->state & QStyle::State_MouseOver){
+        fillColor = QColor(255,255,255);
 
     }
 

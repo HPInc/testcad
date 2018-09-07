@@ -68,6 +68,8 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) Q_DECL_OVERRIDE;
     int getNearestHookPointIndex();
     shapeProperties properties;
+    QColor fillColor;
+    void highlight();
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
@@ -81,7 +83,6 @@ private:
     int shapeWidth;
     int halfMarkerSize;
 
-    QColor color;
     void drawHookMarkers(QPainter *painter, const QStyleOptionGraphicsItem *option);
     QPointF mousePositionInLocalCoordinates;
     QPen chooseShapePenWhen(const QStyleOptionGraphicsItem *option);

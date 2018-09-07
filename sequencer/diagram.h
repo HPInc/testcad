@@ -98,6 +98,7 @@ public:
     bool saveImage(QString imagePath);
     void redrawDiagram();
     void fitViewerTo(QRectF fitArea);
+    void findAndHighlight(QString textToFind);
 
 private:
     int nextID;

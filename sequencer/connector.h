@@ -67,6 +67,7 @@ public:
     QPainterPath shape() const Q_DECL_OVERRIDE;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) Q_DECL_OVERRIDE;
     connectorProperties properties;
+    void setHighlighted(bool doHighLight);
 
 private:
     void setup();

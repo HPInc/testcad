@@ -35,6 +35,14 @@ floatingTextBox::floatingTextBox(QString text, QPointF initialPosition, QGraphic
     this->setPos(initialPosition);
     tBox = new textBox(text, QPointF(0,0), this);
 
+    highLight = false;
+
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void floatingTextBox::setHighLighted(bool doHighLight)
+{
+    this->highLight = doHighLight;
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +68,17 @@ void floatingTextBox::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 
     }
 
+    if(option->state & QStyle::State_MouseOver){
+        highLight = false;
+
+    }
+
+    if (highLight){
+        painter->setBrush(QColor(255,255,0));
+        painter->drawRect(tBox->boundingRect());
+
+    }
+
     parentItem()->setData(0, flagValue);
 
 }
@@ -78,4 +97,5 @@ QString floatingTextBox::text()
     return this->tBox->text();
 
 }
+
 

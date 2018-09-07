@@ -51,6 +51,13 @@ connector::connector(QPointF startPoint, QPointF endPoint, int ID, QString text)
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void connector::setHighlighted(bool doHighLight)
+{
+    txtBox->setHighLighted(doHighLight);
+
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
 connector::connector(connectorProperties values)
 {
     properties = values;

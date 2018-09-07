@@ -44,6 +44,21 @@ sequencerWindow::sequencerWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void sequencerWindow::findText()
+{
+    QInputDialog findDialog;
+    findDialog.setFixedSize(512,256);
+    findDialog.setWindowTitle(QObject::tr("Find text"));
+    findDialog.setLabelText(QObject::tr("Text:"));
+    findDialog.exec();
+
+    if (!findDialog.textValue().isEmpty()){
+        diagramEditor->Diagram->findAndHighlight(findDialog.textValue());
+
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
 void sequencerWindow::writeFormattedLines(QString textToWrite)
 {
     for(int i=0; i<textToWrite.size();i++){
@@ -356,14 +371,13 @@ void sequencerWindow::writeCoverageStatistics(int testIndex)
 
 void sequencerWindow::writeTestStatistics(int testIndex)
 {
-        writeCoverageStatistics(testIndex);
-        writeMissingZeroSwitches(testIndex);
+    writeCoverageStatistics(testIndex);
+    writeMissingZeroSwitches(testIndex);
 
-        if(switchLevel > 0){
-            writeMissingNSwitches(testIndex);
+    if(switchLevel > 0){
+        writeMissingNSwitches(testIndex);
 
-        }
-
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -787,9 +801,6 @@ void sequencerWindow::createActions()
     newDiagramAction = new QAction(QIcon(":/icons/newSequenceIcon.png"), STRING_NEW_DIAGRAM, this);
     connect(newDiagramAction,SIGNAL(triggered()),this, SLOT(newDiagram()));
 
-    resetZoomAction = new QAction(QIcon(":/icons/resetZoomIcon.png"),STRING_RESET_ZOOM, this);
-    connect(resetZoomAction,SIGNAL(triggered()),this, SLOT(resetZoom()));
-
     showHelpAction = new QAction(STRING_MENU_HELP, this);
     connect(showHelpAction,SIGNAL(triggered()),this, SLOT(showHelp()));
 
@@ -801,6 +812,9 @@ void sequencerWindow::createActions()
 
     saveImageAction = new QAction(QIcon(":/icons/pictureIcon.png"), STRING_ACTION_EXPORT_IMAGE, this);
     connect(saveImageAction,SIGNAL(triggered()),this, SLOT(saveAsPicture()));
+
+    findTextAction = new QAction(QIcon(":/icons/search.png"), tr("Find text"), this);
+    connect(findTextAction,SIGNAL(triggered()),this, SLOT(findText()));
 
 }
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -817,7 +831,8 @@ void sequencerWindow::createToolBar()
     tb->addAction(addInitialStateAction);
     tb->addAction(addFinalStateAction);
     tb->addSeparator();
-    tb->addAction(resetZoomAction);
+    tb->addAction(findTextAction);
+    tb->addSeparator();
     tb->addAction(centerDiagramAction);
     tb->addSeparator();
     tb->addAction(deleteSelectedAction);
@@ -873,18 +888,11 @@ void sequencerWindow::newDiagram()
 }
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void sequencerWindow::resetZoom()
-{
-    diagramEditor->resetTransform();
-}
-//--------------------------------------------------------------------------------------------------------------------------------
-
 void sequencerWindow::createMenu()
 {
     QMenu *mnu = menuBar()->addMenu(STRING_DESIGN);
     mnu->addAction(storeDiagramAction);
     mnu->addAction(newDiagramAction);
-    mnu->addAction(resetZoomAction);
     mnu->addAction(saveImageAction);
     mnu->addAction(centerDiagramAction);
     mnu->addAction(clearDiagramAction);
@@ -895,6 +903,7 @@ void sequencerWindow::createMenu()
     edit->addAction(addInitialStateAction);
     edit->addAction(addFinalStateAction);
     edit->addAction(deleteSelectedAction);
+    edit->addAction(findTextAction);
 
     QMenu *tests = menuBar()->addMenu(STRING_TESTS);
     tests->addAction(exportAsHtmlAction);

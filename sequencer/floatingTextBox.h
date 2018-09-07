@@ -43,6 +43,10 @@ public:
 
     textBox* tBox;
     QString text();
+    void setHighLighted(bool doHighLight);
+
+private:
+    bool highLight;
 
 };
 
