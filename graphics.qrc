@@ -14,7 +14,6 @@
         <file>icons/search.png</file>
         <file>icons/unsupported.png</file>
         <file>icons/addIcon.png</file>
-        <file>icons/appIcon.ico</file>
         <file>icons/appIcon.png</file>
         <file>icons/copyIcon.png</file>
         <file>icons/cutIcon.png</file>
@@ -73,5 +72,6 @@
         <file>icons/addColumnIcon.png</file>
         <file>icons/addRowIcon.png</file>
         <file>icons/nandIcon.png</file>
+        <file>icons/appIcon.ico</file>
     </qresource>
 </RCC>
