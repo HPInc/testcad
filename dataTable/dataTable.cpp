@@ -33,6 +33,311 @@ dataTable::dataTable()
 }
 //----------------------------------------------------------------------------------------------------
 
+void dataTable::deleteSelectedColumns()
+{
+    QList<int> selectedIdexes = getSelectedIndexes();
+
+    for (int i = 0; i < selectedIdexes.size(); i++){
+        columnHeaders.removeAt(selectedIdexes.at( selectedIdexes.size() - 1 - i ) );
+        columnsCache.removeAt(selectedIdexes.at( selectedIdexes.size() - 1 - i ));
+
+    }
+
+    loadFromCache();
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::loadFromCollection(QTreeWidgetItem *treeItem)
+{
+    cacheTable();
+
+    if ((treeItem != 0) &&
+        (treeItem->data(0,Qt::UserRole).toString() == TAG_TYPE_TEST_COLLECTION)){
+        CollectionData collBuffer = getCollectionDataFrom(treeItem);
+
+        if (!collBuffer.variables.isEmpty()){
+            clear();
+
+            for (int i = 0; i < collBuffer.variables.size(); i++){
+                columnHeaders.append(collBuffer.variables.at(i));
+                columnsCache.append(collBuffer.valuesByVariable.at(i));
+
+            }
+
+            setColumnHeaders(columnHeaders);
+
+            for (int i = 0; i < columnsCache.size(); i++){
+                setColumnValues(i, columnsCache.at( i ));
+
+            }
+
+            update();
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+CollectionData dataTable::getCollectionDataFrom(QTreeWidgetItem *treeItem){
+    CollectionData collData;
+    QStringList vars;
+    QList<QStringList> vals;
+    QStringList valBuff;
+    QList <QVariant> designData = treeItem->data(2,Qt::UserRole).toList();
+
+    if (designData.size() > 0){
+        QVariantList headersStored = designData.at(0).toList();
+
+        for (int i = 1; i < designData.size(); i++){
+            vars.append(headersStored.at(i - 1).toString());
+            QVariantList storedColumnBuff = designData.at(i).toList();
+
+            for (int j = 0; j < storedColumnBuff.size(); j++){
+                valBuff.append(storedColumnBuff.at( j ).toString());
+
+            }
+
+            vals.append(valBuff);
+            valBuff.clear();
+        }
+
+        collData.variables = vars;
+        collData.valuesByVariable = vals;
+    }
+
+    return collData;
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::loadFromItem(QTreeWidgetItem *treeItem)
+{
+    QTreeWidgetItem *item;
+    QList<QTreeWidgetItem*> varBuffer;
+    QStringList columnBuffer;
+    QList<QTreeWidgetItem*> variables;
+
+    cacheTable();
+
+    if (treeItem != 0){
+        varBuffer = getVariableItemsFrom(treeItem);
+        variables.append(varBuffer);
+        clear();
+
+        for (int i = 0; i < variables.size(); i++){
+            item = variables.at(i);
+            columnHeaders.append(item->text(0));
+
+            for (int j=0; j < item->childCount(); j++){
+                columnBuffer.append(item->child(j)->text(0));
+
+            }
+
+            columnsCache.append(columnBuffer);
+            columnBuffer.clear();
+        }
+
+        for (int i = 0; i < columnsCache.size(); i++){
+            setColumnValues(i, columnsCache.at( i ));
+
+        }
+
+        setColumnHeaders(columnHeaders);
+        update();
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+QList<QTreeWidgetItem*> dataTable::getVariableItemsFrom(QTreeWidgetItem *treeItem)
+{
+    QList<QTreeWidgetItem*> lastParents;
+    QList<QTreeWidgetItem*> lastPBuff;
+
+    if (treeItem->childCount() > 1){
+
+        for(int i = 0; i < treeItem->childCount(); i++){
+
+            if(isValidVariable(treeItem)){
+                lastParents.append(treeItem);
+                break;
+
+            }else{
+                lastPBuff = getVariableItemsFrom(treeItem->child(i));
+
+            }
+
+            for (int n = 0; n < lastPBuff.count(); n++){
+                lastParents.append(lastPBuff.at(n));
+
+            }
+        }
+    }
+
+    return lastParents;
+}
+//----------------------------------------------------------------------------------------------------
+
+bool dataTable::isValidVariable(QTreeWidgetItem *treeItem)
+{
+    bool isValid = true;
+
+    if(treeItem->childCount()>1){
+
+        for(int i = 0; i < treeItem->childCount(); i++){
+
+            if (treeItem->child(i)->childCount() > 0){
+                isValid = false;
+                break;
+
+            }
+        }
+
+    }else{
+       isValid = false;
+
+    }
+
+    return isValid;
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveColumn(int polarity)
+{
+    QList<int> selectedIdexes = getSelectedIndexes();
+    QString headerToMove;
+    QStringList columnToMove;
+    int nextPosIdx;
+    cacheTable();
+
+    if (polarity < 0){
+        polarity = -1;
+    }else{
+        polarity = 1;
+    }
+
+    for (int i = 0; i < selectedIdexes.size(); i++){
+        headerToMove = columnHeaders.at(selectedIdexes.at(i));
+        columnToMove = columnsCache.at(selectedIdexes.at(i));
+        columnHeaders.removeAt(selectedIdexes.at(i));
+        columnsCache.removeAt(selectedIdexes.at(i));
+        nextPosIdx = selectedIdexes.at(i) + polarity;
+
+        if (nextPosIdx > columnsCache.size()){
+            columnHeaders.prepend(headerToMove);
+            columnsCache.prepend(columnToMove);
+            nextPosIdx = 0;
+
+        }else if (nextPosIdx < 0){
+            columnHeaders.append(headerToMove);
+            columnsCache.append(columnToMove);
+            nextPosIdx = columnsCache.size() - 1;
+
+        }else{
+            columnHeaders.insert(nextPosIdx,headerToMove);
+            columnsCache.insert(nextPosIdx,columnToMove);
+
+        }
+    }
+
+    loadFromCache();
+    selectColumn(nextPosIdx);
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::loadFromData(QList<QVariant> tableData)
+{
+    QStringList columnBuff;
+
+    if (tableData.size() > 0){
+        QVariantList headersStored = tableData.at(0).toList();
+
+        for (int i = 1; i < tableData.size(); i++){
+            columnHeaders.append(headersStored.at(i - 1).toString());
+            QVariantList storedColumnBuff = tableData.at(i).toList();
+
+            for (int j = 0; j < storedColumnBuff.size(); j++){
+                columnBuff.append(storedColumnBuff.at( j ).toString());
+
+            }
+
+            columnsCache.append(columnBuff);
+            columnBuff.clear();
+
+        }
+
+        loadFromCache();
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveColumnRight()
+{
+    moveColumn(1);
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveColumnLeft()
+{
+    moveColumn(-1);
+}
+//----------------------------------------------------------------------------------------------------
+
+QList<int> dataTable::getSelectedIndexes()
+{
+    QList<int> selectedIdexes;
+
+    if (model->hasIndex(0,0)){
+        QModelIndex index;
+        QModelIndexList indexes = currentSelection->selectedColumns();
+
+        foreach (index, indexes){
+            selectedIdexes.append(index.column());
+
+        }
+    }
+
+    return selectedIdexes;
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::cacheTable()
+{
+    columnHeaders = getColumnHeaders();
+    rowHeaders = getRowHeaders();
+    columnsCache = getColumnValues();
+    QStringList colWithBlanks;
+    QStringList colWithoutBlanks;
+
+    for (int i = 0; i < columnsCache.size(); i++){
+        colWithBlanks = columnsCache.at(i);
+
+        for (int j = 0; j < colWithBlanks.size(); j++){
+
+            if (!colWithBlanks.at(j).isEmpty()){
+                colWithoutBlanks.append(colWithBlanks.at(j));
+
+            }
+        }
+
+        columnsCache.replace(i, colWithoutBlanks);
+        colWithoutBlanks.clear();
+    }
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::loadFromCache()
+{
+    clear();
+    setColumnHeaders(columnHeaders);
+    setRowHeaders(rowHeaders);
+    setColumnValues(columnsCache);
+    update();
+
+}
+//----------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
+
 void dataTable::andByCells(QList<QStringList> valuesByColumn)
 {
     QStringList refCol;

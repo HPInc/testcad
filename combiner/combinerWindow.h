@@ -49,27 +49,13 @@ public:
 
 };
 
-class CollectionData{
-
-public:
-    QStringList variables;
-    QList<QStringList> valuesByVariable;
-
-};
-
 class combinerWindow : public QMainWindow
 {
     Q_OBJECT
 
 private:
-    QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
-    CollectionData getCollectionFrom(QTreeWidgetItem *treeItem);
-    bool isValidVariable(QTreeWidgetItem *treeItem);
-    QList<QStringList> columnsCache;
     QList<QStringList> clickedItemColumns();
-    QStringList columnHeaders;
     void loadStoredData();
-    QList<int> getSelectedIndexes();
     SelectionData getSelectionData();
     int getRandom(int upper);
     void createToolBar();
@@ -79,7 +65,7 @@ private:
     void writeTableToCache();  
     void closeEvent(QCloseEvent *event);
     bool hasChanges;
-    int selectedColumn;
+    void shiftSelected(int polarity);
 
     QXmlStreamWriter *xmlWriter;
     void writeHtmlStyle();
@@ -93,7 +79,6 @@ private:
 public:
     explicit combinerWindow(QWidget *parent = 0, QTreeWidgetItem *testItem = 0);
     static int instance;
-    void updateTable();
 
     QAction *andAction;
     QAction *combineAction;
@@ -136,7 +121,7 @@ public slots:
     void pickFromTree();
     void pickCollection();
     void randomizeSelected();
-    void storeCombination();
+    void saveCombination();
     void showHelp();
     void shiftSelectedUp();
     void shiftSelectedDown();

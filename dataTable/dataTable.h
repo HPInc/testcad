@@ -27,19 +27,27 @@
 
 #ifndef DATATABLE_H
 #define DATATABLE_H
+#include "testCAD.h"
 #include <QTableView>
 #include <QList>
 #include <QAction>
 #include <QTreeWidgetItem>
 #include "dataTable/tableModel.h"
 
-class dataTable : public QTableView
-{
+class CollectionData{
+
+public:
+    QStringList variables;
+    QList<QStringList> valuesByVariable;
+
+};
+
+class dataTable : public QTableView{
+
 public:
     dataTable();
     tableModel *model;
     void clear();
-    void update();
     void setColumnHeaders(QStringList columnHeaders);
     void setRowHeaders(QStringList rowHeaders);
     QStringList getColumnHeaders();
@@ -57,9 +65,27 @@ public:
     void setCellBackground(int cellRow, int cellColumn, QColor cellColor);
     QList<bool> andByRows(QList<QStringList> valuesByColumn);
     void andByCells(QList<QStringList> valuesByColumn);
+    QList<int> getSelectedIndexes();
+    void moveColumnRight();
+    void moveColumnLeft();
+    void deleteSelectedColumns();
+    QList<QStringList> columnsCache;
+    void loadFromItem(QTreeWidgetItem *treeItem);
+    void loadFromData(QList <QVariant> tableData);
+    void loadFromCollection(QTreeWidgetItem *treeItem);
+    QStringList columnHeaders;
+    QStringList rowHeaders;
+    void cacheTable();
+    void loadFromCache();
+    void update();
 
 private:
     QList< QColor > getColumnBackground(int columnIndex);
+    void moveColumn(int polarity);
+
+    QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
+    bool isValidVariable(QTreeWidgetItem *treeItem);
+    CollectionData getCollectionDataFrom(QTreeWidgetItem *treeItem);
 
 };
 
