@@ -67,17 +67,11 @@ class statsWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    QList<QStringList> columnsCache;
-    QStringList columnHeaders;
-    QStringList rowHeaders;
-    QList<int> getSelectedRowsIds();
     void createToolBar();
     iconsCatalog *icons;
     void createActions();
     void createMenus();
-    void writeTableToCache();  
-    int selectedRow;
-    void setColumnsHeaders();
+    void setStatsHeaders();
 
     QXmlStreamWriter *xmlWriter;
 
@@ -92,11 +86,10 @@ private:
 public:
     statsWindow(QWidget *parent = 0, QList<statistics> *treeStatistics = 0);
     void loadStatistics(QList<statistics> *treeStatistics);
-    void updateTable();
     static int instance;
 
-    QAction *shiftUpAction;
-    QAction *shiftDownAction;
+    QAction *moveUpAction;
+    QAction *moveDownAction;
     QAction *showHelpAction;
     QAction *deleteSelectedRowsAction;
     QAction *exportStatsAction;

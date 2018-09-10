@@ -31,6 +31,7 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
 {
     table = new dataTable();
     table->setSelectionBehavior(QAbstractItemView::SelectItems);
+    table->skipEmptyCells = false;
     this->setCentralWidget(table);
     this->setWindowTitle(testItem->text(0));
     this->setWindowIcon(QIcon(":/icons/crossCheckerIcon.png"));
@@ -43,12 +44,106 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
     createMenus();
     rowsParentLabel = new QLabel("");
     columnsParentLabel = new QLabel("");
-    andWithLabel = new QLabel("");
     createToolBar();
     loadStoredData();
     statusBar()->show();
     hasChanges = false;
-    selectedColumn = -1;
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::saveChecker()
+{
+    QList <QVariant> tableData;
+    table->cacheTable();
+
+    if((headerParents.size()>0) && (table->rowHeaders.size()>0) && (table->columnHeaders.size()>0))
+    {
+        tableData.append(headerParents);
+        tableData.append(table->rowHeaders);
+        tableData.append(table->columnHeaders);
+
+        QVariant dataBuff;
+
+        for (int i = 0; i < table->columnsCache.size(); i++){
+            dataBuff.setValue(table->columnsCache.at(i));
+            tableData.append(dataBuff);
+
+        }
+    }
+
+    if(tableData.size() > 0){
+        activeTestItem->setData(2,Qt::UserRole, tableData);
+        statusBar()->showMessage(tr("Data saved."), 3000);
+        hasChanges = false;
+        emit saved();
+
+    }else{
+        statusBar()->showMessage(tr("Nothing saved."), 3000);
+
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::setHeaderFor(int tablePart)
+{
+    QStringList hBuff = getSelectionChildren();
+
+    if (hBuff.size() > 0){
+        table->cacheTable();
+
+        if(tablePart == crossCheckerWindow::rows){
+            table->rowHeaders = hBuff;
+            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
+
+        }else if(tablePart == crossCheckerWindow::columns){
+            table->columnHeaders = hBuff;
+            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
+
+        }
+
+        resetCache();
+        table->loadFromCache();
+        hasChanges = true;
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::resetCache()
+{
+    table->columnsCache.clear();
+    QStringList vals;
+
+    for(int n = 0; n < table->rowHeaders.size(); n++){
+        vals.append("");
+    }
+
+    for(int n = 0; n < table->columnHeaders.size(); n++){
+        table->columnsCache.append(vals);
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::loadStoredData()
+{
+    QStringList checkBuff;
+    QList <QVariant> designData = activeTestItem->data(2,Qt::UserRole).toList();
+
+    if (designData.size() > 0){
+        headerParents = designData.at(0).toStringList();
+        rowsParentLabel->setText(tr(STRING_ROWS_SOURCE) + headerParents.at(0));
+        columnsParentLabel->setText(tr(STRING_COLUMNS_SOURCE) + headerParents.at(1));
+
+        table->rowHeaders = designData.at(1).toStringList();
+        table->columnHeaders = designData.at(2).toStringList();
+
+        for (int i = 3; i < designData.size(); i++){
+            table->columnsCache.append(designData.at(i).toStringList());
+
+        }
+
+        table->loadFromCache();
+    }
 
 }
 //----------------------------------------------------------------------------------------------------
@@ -58,208 +153,30 @@ QTreeWidgetItem* crossCheckerWindow::clickedItem;
 
 //----------------------------------------------------------------------------------------------------
 
-QList<QStringList> crossCheckerWindow::clickedItemColumns()
-{
-    QList<QStringList> storedTable;
-
-    if (crossCheckerWindow::clickedItem!=0){
-        QList <QVariant> designData = crossCheckerWindow::clickedItem->data(2,Qt::UserRole).toList();
-
-        if (designData.size() > 0){
-
-            for (int i = 3; i < designData.size(); i++){
-                storedTable.append(designData.at(i).toStringList());
-
-            }
-        }
-    }
-
-    return storedTable;
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::clearHighlights()
-{
-    table->clearTableBackground();
-    clearHighlightsAction->setVisible(false);
-    andWithLabel->setText("");
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::andWithSelected()
-{
-    if ((crossCheckerWindow::clickedItem!=0) &&
-        (crossCheckerWindow::clickedItem->data(0,Qt::UserRole).toString() == TAG_TYPE_TEST_CROSSCHECK)){
-        andWithLabel->setText(" & " + crossCheckerWindow::clickedItem->text(0));
-        clearHighlightsAction->setVisible(true);
-        QList<QStringList> reference = clickedItemColumns();
-        table->andByCells(reference);
-        crossCheckerWindow::clickedItem = 0;
-
-    }else{
-        statusBar()->showMessage(tr("Must select a valid cross check to AND with..."), 3000);
-
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::storeChecker()
-{
-    writeTableToCache();
-
-    QList <QVariant> tableData;
-    bool allDataInPlace = false;
-
-    if((headerParents.size()>0) && (rowHeaders.size()>0) && (columnHeaders.size()>0))
-        allDataInPlace = true;
-
-    if (allDataInPlace){
-        tableData.append(headerParents);
-        tableData.append(rowHeaders);
-        tableData.append(columnHeaders);
-
-        QVariant dataBuff;
-
-        for (int i = 0; i < columnsCache.size(); i++){
-            dataBuff.setValue(columnsCache.at(i));
-            tableData.append(dataBuff);
-
-        }
-    }
-
-    if(tableData.size() > 0){
-        activeTestItem->setData(2,Qt::UserRole, tableData);
-        statusBar()->showMessage(STRING_DESIGN_STORED, 3000);
-        hasChanges = false;
-        emit saved();
-
-    }else{
-        statusBar()->showMessage(STRING_DESIGN_NOT_STORED, 3000);
-
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
 void crossCheckerWindow::moveColumnLeft()
 {
-    QList<int> selIdxs = getSelectedIndexes();
-    QString headerToMove;
-    QStringList columnToMove;
-    int nextPosIdx;
-    writeTableToCache();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        headerToMove = columnHeaders.at(selIdxs.at(i));
-        columnToMove = columnsCache.at(selIdxs.at(i));
-        columnHeaders.removeAt(selIdxs.at(i));
-        columnsCache.removeAt(selIdxs.at(i));
-        nextPosIdx = selIdxs.at(i) - 1;
-
-        if (nextPosIdx < 0){
-            columnHeaders.append(headerToMove);
-            columnsCache.append(columnToMove);
-            nextPosIdx = columnsCache.size()-1;
-
-        }else{
-            columnHeaders.insert(nextPosIdx,headerToMove);
-            columnsCache.insert(nextPosIdx,columnToMove);
-
-        }
-
-        selectedColumn = nextPosIdx;
-    }
-
-    updateTable();
+    table->moveColumnLeft();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void crossCheckerWindow::moveColumnRight()
 {
-    QList<int> selIdxs = getSelectedIndexes();
-    QString headerToMove;
-    QStringList columnToMove;
-    int nextPosIdx;
-    writeTableToCache();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        headerToMove = columnHeaders.at(selIdxs.at(i));
-        columnToMove = columnsCache.at(selIdxs.at(i));
-        columnHeaders.removeAt(selIdxs.at(i));
-        columnsCache.removeAt(selIdxs.at(i));
-        nextPosIdx = selIdxs.at(i) + 1;
-
-        if (nextPosIdx > columnsCache.size()){
-            columnHeaders.prepend(headerToMove);
-            columnsCache.prepend(columnToMove);
-            nextPosIdx = 0;
-
-        }else{
-            columnHeaders.insert(nextPosIdx,headerToMove);
-            columnsCache.insert(nextPosIdx,columnToMove);
-
-        }
-
-        selectedColumn = nextPosIdx;
-    }
-
-    updateTable();
-    hasChanges = true;
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::shiftSelectedUp()
-{
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedIndexes();
-    QStringList cBuff;
-    QString shiftBuff;
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        cBuff = columnsCache.at(selIdxs.at(i));
-        shiftBuff = cBuff.first();
-        cBuff.removeFirst();
-        cBuff.append(shiftBuff);
-        columnsCache.replace(selIdxs.at(i),cBuff);
-
-    }
-
-    updateTable();
-    hasChanges = true;
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::shiftSelectedDown()
-{
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedIndexes();
-    QStringList cBuff;
-    QString shiftBuff;
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        cBuff = columnsCache.at(selIdxs.at(i));
-        shiftBuff = cBuff.last();
-        cBuff.removeLast();
-        cBuff.prepend(shiftBuff);
-        columnsCache.replace(selIdxs.at(i),cBuff);
-
-    }
-
-    updateTable();
+    table->moveColumnRight();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void crossCheckerWindow::applyCoverageTo(QList<QStringList> *columnsList)
 {
-    writeTableToCache();
+    table->cacheTable();
 
-    if(columnsList->size() * rowHeaders.size() > 0){
+    if(columnsList->size() * table->rowHeaders.size() > 0){
         bool ok;
-        int cov = QInputDialog::getInt(this,STRING_COVERAGE,STRING_COVERAGE_PERCENT,33,1,100,1,&ok);
+        int cov = QInputDialog::getInt(this,tr("Set coverage"),tr("Coverage percent"),33,1,100,1,&ok);
 
         if(ok){
-            int nCells = columnsList->size() * rowHeaders.size();
+            int nCells = columnsList->size() * table->rowHeaders.size();
             int toCover = qRound(nCells * static_cast<double>(cov/100.0));
             int byCol = qRound(static_cast<double>(toCover / columnsList->size()));
             if (byCol == 0) byCol = 1;
@@ -289,10 +206,10 @@ void crossCheckerWindow::applyCoverageTo(QList<QStringList> *columnsList)
         }
 
     }else{
-        QMessageBox msg(QMessageBox::Information, STRING_CROSS_CHECKER, STRING_DESIGN_EMPTY, QMessageBox::Ok);
+        QMessageBox msg(QMessageBox::Information, tr("Cross checker."), tr("Design is empty..."), QMessageBox::Ok);
         msg.resize(200,100);
         msg.exec();
-        statusBar()->showMessage(STRING_DESIGN_EMPTY, 2000);
+        statusBar()->showMessage(tr("Design is empty..."), 2000);
 
     }
 }
@@ -300,57 +217,33 @@ void crossCheckerWindow::applyCoverageTo(QList<QStringList> *columnsList)
 
 void crossCheckerWindow::coverSelected()
 {
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedIndexes();
+    table->cacheTable();
+    QList<int> selIdxs = table->getSelectedIndexes(dataTable::selectionColumn);
     QList<QStringList> colsBuff;
 
     for (int i = 0; i < selIdxs.size(); i++){
-        colsBuff.append(columnsCache.at(selIdxs.at(i)));
+        colsBuff.append(table->columnsCache.at(selIdxs.at(i)));
 
     }
 
     applyCoverageTo(&colsBuff);
 
     for (int i = 0; i < selIdxs.size(); i++){
-        columnsCache.replace(selIdxs.at(i),colsBuff.at(i));
+        table->columnsCache.replace(selIdxs.at(i),colsBuff.at(i));
 
     }
 
-    updateTable();
+    table->loadFromCache();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void crossCheckerWindow::coverAll()
 {
-    writeTableToCache();
-    applyCoverageTo(&columnsCache);
-    updateTable();
+    table->cacheTable();
+    applyCoverageTo(&table->columnsCache);
+    table->loadFromCache();
     hasChanges = true;
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::loadStoredData()
-{
-    QStringList checkBuff;
-    QList <QVariant> designData = activeTestItem->data(2,Qt::UserRole).toList();
-
-    if (designData.size() > 0){
-        headerParents = designData.at(0).toStringList();
-        rowsParentLabel->setText(tr(STRING_ROWS_SOURCE) + headerParents.at(0));
-        columnsParentLabel->setText(tr(STRING_COLUMNS_SOURCE) + headerParents.at(1));
-
-        rowHeaders = designData.at(1).toStringList();
-        columnHeaders = designData.at(2).toStringList();
-
-        for (int i = 3; i < designData.size(); i++){
-            columnsCache.append(designData.at(i).toStringList());
-
-        }
-
-        updateTable();
-    }
 
 }
 //----------------------------------------------------------------------------------------------------
@@ -424,7 +317,7 @@ void crossCheckerWindow::writeColumnHeaders()
         xmlWriter->writeEndElement();
         xmlWriter->writeStartElement("td");
             xmlWriter->writeAttribute("class","horizontal");
-            xmlWriter->writeAttribute("colspan",QString::number(columnHeaders.count() + 2));
+            xmlWriter->writeAttribute("colspan",QString::number(table->columnHeaders.count() + 2));
             xmlWriter->writeCharacters(headerParents.at(1));
         xmlWriter->writeEndElement();
     xmlWriter->writeEndElement();
@@ -432,8 +325,8 @@ void crossCheckerWindow::writeColumnHeaders()
     xmlWriter->writeStartElement("tr");
     xmlWriter->writeTextElement("th","");
 
-    for (int i = 0; i < columnHeaders.size(); i++){
-        xmlWriter->writeTextElement("th",columnHeaders.at(i));
+    for (int i = 0; i < table->columnHeaders.size(); i++){
+        xmlWriter->writeTextElement("th",table->columnHeaders.at(i));
 
     }
 
@@ -449,11 +342,11 @@ void crossCheckerWindow::writeDataRows()
         xmlWriter->writeStartElement("tr");
             xmlWriter->writeStartElement("td");
                 xmlWriter->writeAttribute("class","rowh");
-                xmlWriter->writeCharacters(rowHeaders.at(i));
+                xmlWriter->writeCharacters(table->rowHeaders.at(i));
             xmlWriter->writeEndElement();
 
-        for (int j = 0; j < columnsCache.size(); j++){
-            colBuff = columnsCache.at(j);
+        for (int j = 0; j < table->columnsCache.size(); j++){
+            colBuff = table->columnsCache.at(j);
 
             if(i < colBuff.size()){
                 xmlWriter->writeStartElement("td");
@@ -523,45 +416,6 @@ QStringList crossCheckerWindow::getSelectionChildren()
 }
 //----------------------------------------------------------------------------------------------------
 
-void crossCheckerWindow::setHeaderFor(int tablePart)
-{
-    QStringList hBuff = getSelectionChildren();
-
-    if (hBuff.size() > 0){
-        writeTableToCache();
-
-        if(tablePart == crossCheckerWindow::rows){
-            this->rowHeaders = hBuff;
-            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
-
-        }else if(tablePart == crossCheckerWindow::columns){
-            this->columnHeaders = hBuff;
-            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
-
-        }
-
-        resetCache();
-        updateTable();
-        hasChanges = true;
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::resetCache()
-{
-    columnsCache.clear();
-    QStringList vals;
-
-    for(int n = 0; n < rowHeaders.size(); n++){
-        vals.append("");
-    }
-
-    for(int n = 0; n < columnHeaders.size(); n++){
-        columnsCache.append(vals);
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
 void crossCheckerWindow::pickColumnHeadersFromTree()
 {
     setHeaderFor(crossCheckerWindow::columns);
@@ -584,7 +438,7 @@ void crossCheckerWindow::closeEvent(QCloseEvent *event)
         int decission = msg.exec();
 
         if (decission == QMessageBox::Save ){
-            storeChecker();
+            saveChecker();
             doClose = true;
 
         }else if(decission == QMessageBox::Cancel){
@@ -614,7 +468,7 @@ void crossCheckerWindow::exportChecker()
                                          QDir::currentPath(),
                                          QObject::tr(STRING_FILETYPE_HTML));
 
-    writeTableToCache();
+    table->cacheTable();
 
     if (!filePath.endsWith(".html"))
         filePath = filePath + ".html";
@@ -647,14 +501,6 @@ void crossCheckerWindow::createToolBar()
     tb->addAction(moveColumnRightAction);
     tb->addAction(deleteSelectedColumnsAction);
     tb->addSeparator();
-    tb->addAction(shiftUpAction);
-    tb->addAction(shiftDownAction);
-    tb->addSeparator();
-    tb->addAction(andAction);
-    tb->addSeparator();
-    tb->addAction(clearHighlightsAction);
-    tb->addWidget(andWithLabel);
-    tb->addSeparator();
     tb->addWidget(rowsParentLabel);
     tb->addSeparator();
     tb->addWidget(columnsParentLabel);
@@ -664,77 +510,23 @@ void crossCheckerWindow::createToolBar()
 
 void crossCheckerWindow::deleteSelectedColumns()
 {
-    QList<int> selIdxs = getSelectedIndexes();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        columnHeaders.removeAt(selIdxs.at( selIdxs.size() - 1 - i ) );
-        columnsCache.removeAt(selIdxs.at( selIdxs.size() - 1 - i ));
-
-    }
-
-    updateTable();
+    table->deleteSelectedColumns();
     hasChanges = true;
 
 }
 //----------------------------------------------------------------------------------------------------
 
-QList<int> crossCheckerWindow::getSelectedIndexes()
-{
-    QList<int> selIdxs;
-
-    if (table->model->hasIndex(0,0)){
-        QModelIndex index;
-        QModelIndexList indexes = table->currentSelection->selectedColumns();
-
-        foreach (index, indexes){
-            selIdxs.append(index.column());
-
-        }
-    }
-
-    return selIdxs;
-}
-//----------------------------------------------------------------------------------------------------
-
 void crossCheckerWindow::showHelp()
 {
-    QMessageBox::about(this,tr(STRING_CROSS_CHECKER), tr(STRING_CROSS_CHECKER_HELP));
+    QMessageBox::about(this,tr("Cross checker"), tr("Help"));
 
 }
 //----------------------------------------------------------------------------------------------------
 
 void crossCheckerWindow::clearTable()
 {
-    QStringList colBuff;
-
-    for (int i = 0; i < columnsCache.size(); i++){
-        colBuff = columnsCache.at(i);
-
-        for (int j = 0; j < colBuff.size(); j++){
-            colBuff.replace(j,"");
-        }
-
-        columnsCache.replace(i,colBuff);
-    }
-
-    updateTable();
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::updateTable()
-{
     table->clear();
-    table->setColumnHeaders(columnHeaders);
-    table->setRowHeaders(rowHeaders);
-    table->setColumnValues(columnsCache);
-    table->update();
-
-    if (selectedColumn > -1){
-        table->selectColumn(selectedColumn);
-        selectedColumn = -1;
-
-    }
-
+    hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -742,51 +534,38 @@ void crossCheckerWindow::createActions()
 {
     icons = new iconsCatalog;
 
-    saveCheckerAction = new QAction(icons->saveIcon, STRING_ACTION_STORE,this);
-    connect(saveCheckerAction,SIGNAL(triggered()),this,SLOT(storeChecker()));
+    saveCheckerAction = new QAction(icons->saveIcon, tr("Save"),this);
+    connect(saveCheckerAction,SIGNAL(triggered()),this,SLOT(saveChecker()));
 
-    exportCheckerAction = new QAction(icons->htmlIcon, STRING_ACTION_EXPORT,this);
+    exportCheckerAction = new QAction(icons->htmlIcon, tr("Export html"),this);
     connect(exportCheckerAction,SIGNAL(triggered()),this,SLOT(exportChecker()));
 
-    pickColumnHeadersAction = new QAction(icons->pickColumnHeadersIcon, STRING_ACTION_GET_COLUMN_HEADERS,this);
+    pickColumnHeadersAction = new QAction(icons->pickColumnHeadersIcon, tr("Get column headers"),this);
     connect(pickColumnHeadersAction,SIGNAL(triggered()),this,SLOT(pickColumnHeadersFromTree()));
 
-    pickRowHeadersAction = new QAction(icons->pickRowHeadersIcon, STRING_ACTION_GET_ROW_HEADERS,this);
+    pickRowHeadersAction = new QAction(icons->pickRowHeadersIcon, tr("Get row headers"),this);
     connect(pickRowHeadersAction,SIGNAL(triggered()),this,SLOT(pickRowHeadersFromTree()));
 
-    showHelpAction = new QAction(STRING_MENU_HELP,this);
+    showHelpAction = new QAction(tr("Help"),this);
     connect(showHelpAction,SIGNAL(triggered()),this,SLOT(showHelp()));
 
-    deleteSelectedColumnsAction= new QAction(icons->deleteIcon, STRING_ACTION_DELETE_SELECTED_COLUMNS,this);
+    deleteSelectedColumnsAction= new QAction(icons->deleteIcon, tr("Delete selected columns"),this);
     connect(deleteSelectedColumnsAction,SIGNAL(triggered()),this,SLOT(deleteSelectedColumns()));
 
-    clearTableAction = new QAction(QIcon(":/icons/clearIcon.png"),STRING_ACTION_CLEAR_TABLE,this);
+    clearTableAction = new QAction(QIcon(":/icons/clearIcon.png"),tr("Clear table"),this);
     connect(clearTableAction,SIGNAL(triggered()),this,SLOT(clearTable()));
 
-    coverSelectedAction = new QAction(icons->fillIcon, STRING_ACTION_COVER_SELECTED,this);
+    coverSelectedAction = new QAction(icons->fillIcon, tr("Cover selected"),this);
     connect(coverSelectedAction,SIGNAL(triggered()),this,SLOT(coverSelected()));
 
-    moveColumnLeftAction = new QAction(icons->leftIcon, STRING_ACTION_MOVE_LEFT,this);
+    moveColumnLeftAction = new QAction(icons->leftIcon, tr("Move left"),this);
     connect(moveColumnLeftAction,SIGNAL(triggered()),this,SLOT(moveColumnLeft()));
 
-    moveColumnRightAction = new QAction(icons->rightIcon, STRING_ACTION_MOVE_RIGHT,this);
+    moveColumnRightAction = new QAction(icons->rightIcon, tr("Move right"),this);
     connect(moveColumnRightAction,SIGNAL(triggered()),this,SLOT(moveColumnRight()));
 
-    coverAllAction = new QAction(icons->coverIcon, STRING_ACTION_COVER_ALL,this);
+    coverAllAction = new QAction(icons->coverIcon, tr("Cover all"),this);
     connect(coverAllAction,SIGNAL(triggered()),this,SLOT(coverAll()));
-
-    shiftUpAction = new QAction(icons->upIcon, STRING_ACTION_SHIFT_UP,this);
-    connect(shiftUpAction,SIGNAL(triggered()),this,SLOT(shiftSelectedUp()));
-
-    shiftDownAction = new QAction(icons->downIcon, STRING_ACTION_SHIFT_DOWN,this);
-    connect(shiftDownAction,SIGNAL(triggered()),this,SLOT(shiftSelectedDown()));
-
-    andAction = new QAction(icons->andIcon, "And with selected",this);
-    connect(andAction,SIGNAL(triggered()),this,SLOT(andWithSelected()));
-
-    clearHighlightsAction = new QAction(icons->clearHighlightsIcon, QObject::tr(STRING_ACTION_CLEAR_HIGHLIGHTS), this);
-    clearHighlightsAction->setVisible(false);
-    connect(clearHighlightsAction, SIGNAL(triggered()), this, SLOT(clearHighlights()));
 
 }
 //----------------------------------------------------------------------------------------------------
@@ -795,34 +574,25 @@ void crossCheckerWindow::createMenus()
 {
     QMenuBar *mb = this->menuBar();
 
-    QMenu *saveMenu = mb->addMenu(STRING_DESIGN);
+    QMenu *saveMenu = mb->addMenu(tr("Table"));
         saveMenu->addAction(saveCheckerAction);
         saveMenu->addAction(exportCheckerAction);
         saveMenu->addAction(clearTableAction);
 
-    QMenu *variablesMenu = mb->addMenu(STRING_MENU_VARIABLES);
+    QMenu *variablesMenu = mb->addMenu(tr("Variables"));
         variablesMenu->addAction(pickRowHeadersAction);
         variablesMenu->addAction(pickColumnHeadersAction);
         variablesMenu->addSeparator();
         variablesMenu->addAction(coverAllAction);
         variablesMenu->addAction(coverSelectedAction);
 
-    QMenu *columnsMenu = mb->addMenu(STRING_MENU_COLUMNS);
+    QMenu *columnsMenu = mb->addMenu(tr("Columns"));
         columnsMenu->addAction(deleteSelectedColumnsAction);
         columnsMenu->addAction(moveColumnLeftAction);
         columnsMenu->addAction(moveColumnRightAction);
 
-    QMenu *helpMenu = mb->addMenu(STRING_MENU_HELP);
+    QMenu *helpMenu = mb->addMenu(tr("Help"));
         helpMenu->addAction(showHelpAction);
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::writeTableToCache()
-{
-    columnHeaders = table->getColumnHeaders();
-    rowHeaders = table->getRowHeaders();
-    columnsCache = table->getColumnValues();
 
 }
 //----------------------------------------------------------------------------------------------------

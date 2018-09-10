@@ -54,6 +54,12 @@ class combinerWindow : public QMainWindow
     Q_OBJECT
 
 private:
+
+    enum shiftingDirection{
+        shiftUp,
+        shiftDown
+    };
+
     QList<QStringList> clickedItemColumns();
     void loadStoredData();
     SelectionData getSelectionData();
@@ -62,10 +68,9 @@ private:
     iconsCatalog *icons;
     void createActions();
     void createMenus();
-    void writeTableToCache();  
     void closeEvent(QCloseEvent *event);
     bool hasChanges;
-    void shiftSelected(int polarity);
+    void shiftSelected(shiftingDirection direction);
 
     QXmlStreamWriter *xmlWriter;
     void writeHtmlStyle();

@@ -31,6 +31,7 @@ collectorWindow::collectorWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
 {
     table = new dataTable();
     table->setSelectionBehavior(QAbstractItemView::SelectColumns);
+    table->skipEmptyCells = true;
     this->setCentralWidget(table);
     this->setWindowTitle(testItem->text(0));
     this->setWindowIcon(QIcon(":/icons/collectionIcon.png"));
@@ -44,238 +45,69 @@ collectorWindow::collectorWindow(QWidget *parent, QTreeWidgetItem *testItem) : Q
     loadStoredData();
     statusBar()->show();
     hasChanges = false;
-    selectedColumn = -1;
     collectorWindow::instance = 1;
 
 }
 //----------------------------------------------------------------------------------------------------
 
-int collectorWindow::instance = 0;
-QTreeWidgetItem* collectorWindow::clickedItem = 0;
-
-//----------------------------------------------------------------------------------------------------
-
 void collectorWindow::addColumn()
 {
-    bool ok;
-    QString dialogCaption = tr("Adding a column...");
-    QString headerText = QInputDialog::getText(this, dialogCaption,tr("Header text"),QLineEdit::Normal,"",&ok);
-
-    if(ok){
-
-        if (headerText.isEmpty()){
-            QMessageBox msg(QMessageBox::Critical, dialogCaption,
-                            tr("You must provide a text for the header"),QMessageBox::Ok);
-            msg.exec();
-            statusBar()->showMessage(tr("Nothing added..."),3000);
-
-        }else{
-            writeTableToCache();
-            columnHeaders.append(headerText);
-            QStringList newColBuff;
-            newColBuff.append("");
-            columnsCache.append(newColBuff);
-            updateTable();
-        }
-    }
+    table->addColumn();
+    hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::addRow()
 {
-    if (!columnsCache.isEmpty()){
-        QStringList cbff;
-        writeTableToCache();
-
-        for(int i = 0; i < columnsCache.size(); i++){
-            cbff = columnsCache.at(i);
-            cbff.append("");
-            columnsCache.replace(i, cbff);
-
-        }
-
-        updateTable();
-    }
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::clearHighlights()
-{
-    table->clearTableBackground();
-    clearHighlightsAction->setVisible(false);
-}
-//----------------------------------------------------------------------------------------------------
-
-QList<QStringList> collectorWindow::clickedItemColumns()
-{
-    QList<QStringList> storedTable;
-
-    if (collectorWindow::clickedItem!=0){
-        QList <QVariant> designData = collectorWindow::clickedItem->data(2,Qt::UserRole).toList();
-
-        if (designData.size() > 0){
-
-            for (int i = 1; i < designData.size(); i++){
-                storedTable.append(designData.at(i).toStringList());
-            }
-        }
-    }
-
-    return storedTable;
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::shiftSelectedUp()
-{
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedIndexes();
-    QStringList cBuff;
-    QString shiftBuff;
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        cBuff = columnsCache.at(selIdxs.at(i));
-        shiftBuff = cBuff.first();
-        cBuff.removeFirst();
-        cBuff.append(shiftBuff);
-        columnsCache.replace(selIdxs.at(i),cBuff);
-        selectedColumn = selIdxs.at(i);
-
-    }
-
-    updateTable();
+    table->addRow();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
-void collectorWindow::shiftSelectedDown()
+void collectorWindow::loadStoredData()
 {
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedIndexes();
-    QStringList cBuff;
-    QString shiftBuff;
+    table->loadFromData(activeTestItem->data(2,Qt::UserRole).toList());
+}
+//----------------------------------------------------------------------------------------------------
 
-    for (int i = 0; i < selIdxs.size(); i++){
-        cBuff = columnsCache.at(selIdxs.at(i));
-        shiftBuff = cBuff.last();
-        cBuff.removeLast();
-        cBuff.prepend(shiftBuff);
-        columnsCache.replace(selIdxs.at(i), cBuff);
-        selectedColumn = selIdxs.at(i);
+void collectorWindow::pickCollection()
+{
+    table->loadFromCollection(collectorWindow::clickedItem);
+    hasChanges = true;
+}
+//----------------------------------------------------------------------------------------------------
 
-    }
+void collectorWindow::deleteSelectedColumns()
+{
+    table->deleteSelectedColumns();
+    hasChanges = true;
+}
+//----------------------------------------------------------------------------------------------------
 
-    updateTable();
+void collectorWindow::pickFromTree()
+{
+    table->loadFromItem(collectorWindow::clickedItem);
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::moveColumnLeft()
 {
-    QList<int> selIdxs = getSelectedIndexes();
-    QString headerToMove;
-    QStringList columnToMove;
-    int nextPosIdx;
-    writeTableToCache();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        headerToMove = columnHeaders.at(selIdxs.at(i));
-        columnToMove = columnsCache.at(selIdxs.at(i));
-        columnHeaders.removeAt(selIdxs.at(i));
-        columnsCache.removeAt(selIdxs.at(i));
-        nextPosIdx = selIdxs.at(i) - 1;
-
-        if (nextPosIdx < 0){
-            columnHeaders.append(headerToMove);
-            columnsCache.append(columnToMove);
-            nextPosIdx = columnsCache.size()-1;
-
-        }else{
-            columnHeaders.insert(nextPosIdx,headerToMove);
-            columnsCache.insert(nextPosIdx,columnToMove);
-
-        }
-
-        selectedColumn = nextPosIdx;
-    }
-
-    updateTable();
+    table->moveColumnLeft();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::moveColumnRight()
 {
-    QList<int> selIdxs = getSelectedIndexes();
-    QString headerToMove;
-    QStringList columnToMove;
-    int nextPosIdx;
-    writeTableToCache();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        headerToMove = columnHeaders.at(selIdxs.at(i));
-        columnToMove = columnsCache.at(selIdxs.at(i));
-        columnHeaders.removeAt(selIdxs.at(i));
-        columnsCache.removeAt(selIdxs.at(i));
-        nextPosIdx = selIdxs.at(i) + 1;
-
-        if (nextPosIdx > columnsCache.size()){
-            columnHeaders.prepend(headerToMove);
-            columnsCache.prepend(columnToMove);
-            nextPosIdx = 0;
-
-        }else{
-            columnHeaders.insert(nextPosIdx,headerToMove);
-            columnsCache.insert(nextPosIdx,columnToMove);
-
-        }
-
-        selectedColumn = nextPosIdx;
-    }
-
-    updateTable();
+    table->moveColumnRight();
     hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
-void collectorWindow::updateTable()
-{
-    table->clear();
-    table->setColumnHeaders(columnHeaders);
-    table->setColumnValues(columnsCache);
-    table->update();
+int collectorWindow::instance = 0;
+QTreeWidgetItem* collectorWindow::clickedItem = 0;
 
-    if (selectedColumn > -1){
-        table->selectColumn(selectedColumn);
-        selectedColumn = -1;
-
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::writeTableToCache()
-{
-    columnHeaders = table->getColumnHeaders();
-    columnsCache = table->getColumnValues();
-    QStringList colWithBlanks;
-    QStringList colWithoutBlanks;
-
-    for (int i = 0; i < columnsCache.size(); i++){
-        colWithBlanks = columnsCache.at(i);
-
-        for (int j = 0; j < colWithBlanks.size(); j++){
-
-            if (!colWithBlanks.at(j).isEmpty()){
-                colWithoutBlanks.append(colWithBlanks.at(j));
-
-            }
-        }
-
-        columnsCache.replace(i, colWithoutBlanks);
-        colWithoutBlanks.clear();
-    }
-
-}
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::writeHtmlStyle()
@@ -306,8 +138,8 @@ void collectorWindow::writeColumnHeaders()
     xmlWriter->writeStartElement("tr");
     xmlWriter->writeTextElement("th","#");
 
-    for (int i = 0; i < columnHeaders.size(); i++){
-        xmlWriter->writeTextElement("th",columnHeaders.at(i));
+    for (int i = 0; i < table->columnHeaders.size(); i++){
+        xmlWriter->writeTextElement("th",table->columnHeaders.at(i));
 
     }
 
@@ -318,6 +150,7 @@ void collectorWindow::writeColumnHeaders()
 void collectorWindow::writeDataRows()
 {
     QStringList colBuff;
+    table->loadFromCache();
 
     for (int i = 0; i < table->rowCount(); i++){
         xmlWriter->writeStartElement("tr");
@@ -325,8 +158,8 @@ void collectorWindow::writeDataRows()
         xmlWriter->writeCharacters(QString::number(i + 1));
         xmlWriter->writeEndElement();
 
-        for (int j = 0; j < columnsCache.size(); j++){
-            colBuff = columnsCache.at(j);
+        for (int j = 0; j < table->columnsCache.size(); j++){
+            colBuff = table->columnsCache.at(j);
             xmlWriter->writeStartElement("td");
 
             if(i < colBuff.size()){
@@ -419,7 +252,7 @@ void collectorWindow::exportCollection()
                                          QDir::currentPath(),
                                          QObject::tr(STRING_FILETYPE_HTML));
 
-    writeTableToCache();
+    table->cacheTable();
 
     if (!filePath.endsWith(".html"))
         filePath = filePath + ".html";
@@ -447,135 +280,28 @@ void collectorWindow::createToolBar()
     tb->addAction(exportCollectionAction);
     tb->addSeparator();
     tb->addAction(pickVariablesAction);
+    tb->addAction(pickCollectionAction);
     tb->addAction(addColumnAction);
     tb->addAction(addRowAction);
     tb->addSeparator();
     tb->addAction(moveColumnLeftAction);
     tb->addAction(moveColumnRightAction);
     tb->addSeparator();
-    tb->addAction(shiftUpAction);
-    tb->addAction(shiftDownAction);
-    tb->addSeparator();
     tb->addAction(deleteSelectedColumnsAction);
-    tb->addSeparator();
-    tb->addAction(clearHighlightsAction);
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::deleteSelectedColumns()
-{
-    QList<int> selIdxs = getSelectedIndexes();
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        columnHeaders.removeAt(selIdxs.at( selIdxs.size() - 1 - i ) );
-        columnsCache.removeAt(selIdxs.at( selIdxs.size() - 1 - i ));
-
-    }
-
-    updateTable();
-    hasChanges = true;
-
-}
-//----------------------------------------------------------------------------------------------------
-
-QList<int> collectorWindow::getSelectedIndexes()
-{
-    QList<int> selIdxs;
-
-    if (table->model->hasIndex(0,0)){
-        QModelIndex index;
-        QModelIndexList indexes = table->currentSelection->selectedColumns();
-
-        foreach (index, indexes){
-            selIdxs.append(index.column());
-
-        }
-    }
-
-    return selIdxs;
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::loadStoredData()
-{
-    QStringList collectionBuff;
-    QList <QVariant> designData = activeTestItem->data(2,Qt::UserRole).toList();
-
-    if (designData.size() > 0){
-        QVariantList headersStored = designData.at(0).toList();
-
-        for (int i = 1; i < designData.size(); i++){
-            columnHeaders.append(headersStored.at(i - 1).toString());
-            QVariantList storedColumnBuff = designData.at(i).toList();
-
-            for (int j = 0; j < storedColumnBuff.size(); j++){
-                collectionBuff.append(storedColumnBuff.at( j ).toString());
-
-            }
-
-            columnsCache.append(collectionBuff);
-            collectionBuff.clear();
-
-        }
-
-        updateTable();
-
-    }
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void collectorWindow::pickFromTree()
-{
-    QTreeWidgetItem *item;
-    QList<QTreeWidgetItem*> varBuffer;
-    QStringList columnBuffer;
-    writeTableToCache();
-    variables.clear();
-
-    if (collectorWindow::clickedItem != 0){
-        varBuffer = getVariableItemsFrom(collectorWindow::clickedItem);
-        variables.append(varBuffer);
-        table->clear();
-
-        for (int i = 0; i < variables.size(); i++){
-            item = variables.at(i);
-            columnHeaders.append(item->text(0));
-
-            for (int j=0; j < item->childCount(); j++){
-                columnBuffer.append(item->child(j)->text(0));
-
-            }
-
-            columnsCache.append(columnBuffer);
-            columnBuffer.clear();
-
-        }
-
-        for (int i = 0; i < columnsCache.size(); i++){
-            table->setColumnValues(i, columnsCache.at( i ));
-
-        }
-
-        table->setColumnHeaders(columnHeaders);
-        table->update();
-        hasChanges = true;
-    }
 
 }
 //----------------------------------------------------------------------------------------------------
 
 void collectorWindow::storeCollection()
 {
-    if(columnHeaders.size() > 0){
+    if(table->columnHeaders.size() > 0){
         QVariant dataBuff;
         QList <QVariant> tableData;
-        writeTableToCache();
-        tableData.append(columnHeaders);
+        table->cacheTable();
+        tableData.append(table->columnHeaders);
 
-        for (int i = 0; i < columnsCache.size(); i++){
-            dataBuff.setValue(columnsCache.at(i));
+        for (int i = 0; i < table->columnsCache.size(); i++){
+            dataBuff.setValue(table->columnsCache.at(i));
             tableData.append(dataBuff);
 
         }
@@ -603,9 +329,7 @@ void collectorWindow::showHelp()
 void collectorWindow::clearTable()
 {
     table->clear();
-    variables.clear();
-    columnHeaders.clear();
-    columnsCache.clear();
+    hasChanges = true;
 
 }
 //----------------------------------------------------------------------------------------------------
@@ -629,6 +353,9 @@ void collectorWindow::createActions()
     pickVariablesAction = new QAction(icons->pickIcon, tr("Get variables"),this);
     connect(pickVariablesAction,SIGNAL(triggered()),this,SLOT(pickFromTree()));
 
+    pickCollectionAction = new QAction(icons->pickCollectionIcon, tr("Pick selected collection"),this);
+    connect(pickCollectionAction,SIGNAL(triggered()),this,SLOT(pickCollection()));
+
     showHelpAction = new QAction(tr("Help"),this);
     connect(showHelpAction,SIGNAL(triggered()),this,SLOT(showHelp()));
 
@@ -638,21 +365,12 @@ void collectorWindow::createActions()
     clearTableAction = new QAction(QIcon(":/icons/clearIcon.png"),tr("Clear table"),this);
     connect(clearTableAction,SIGNAL(triggered()),this,SLOT(clearTable()));
 
-    moveColumnLeftAction = new QAction(icons->leftIcon, tr("Move column to the left"),this);
+    moveColumnLeftAction = new QAction(icons->leftIcon, tr("Move column left"),this);
     connect(moveColumnLeftAction,SIGNAL(triggered()),this,SLOT(moveColumnLeft()));
 
-    moveColumnRightAction = new QAction(icons->rightIcon, tr("Move column to the right"),this);
+    moveColumnRightAction = new QAction(icons->rightIcon, tr("Move column right"),this);
     connect(moveColumnRightAction,SIGNAL(triggered()),this,SLOT(moveColumnRight()));
 
-    shiftUpAction = new QAction(icons->upIcon, tr("Shift up"),this);
-    connect(shiftUpAction,SIGNAL(triggered()),this,SLOT(shiftSelectedUp()));
-
-    shiftDownAction = new QAction(icons->downIcon, tr("Shift down"),this);
-    connect(shiftDownAction,SIGNAL(triggered()),this,SLOT(shiftSelectedDown()));
-
-    clearHighlightsAction = new QAction(icons->clearHighlightsIcon, QObject::tr("Clear highlights"), this);
-    clearHighlightsAction->setVisible(false);
-    connect(clearHighlightsAction, SIGNAL(triggered()), this, SLOT(clearHighlights()));
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -667,6 +385,7 @@ void collectorWindow::createMenus()
 
     QMenu *variablesMenu = mb->addMenu(tr("Variables"));
         variablesMenu->addAction(pickVariablesAction);
+        variablesMenu->addAction(pickCollectionAction);
         variablesMenu->addSeparator();
 
     QMenu *columnsMenu = mb->addMenu(tr("Columns"));
@@ -677,62 +396,6 @@ void collectorWindow::createMenus()
     QMenu *helpMenu = mb->addMenu(tr("Help"));
         helpMenu->addAction(showHelpAction);
 
-}
-//----------------------------------------------------------------------------------------------------
-
-QList<QTreeWidgetItem*> collectorWindow::getVariableItemsFrom(QTreeWidgetItem *treeItem)
-{
-    QList<QTreeWidgetItem*> lastParents;
-    QList<QTreeWidgetItem*> lastPBuff;
-
-    if (treeItem->childCount() > 1){
-
-        for(int i = 0; i < treeItem->childCount(); i++){
-
-            if(isValidVariable(treeItem)){
-                lastParents.append(treeItem);
-                break;
-
-            }else{
-                lastPBuff = getVariableItemsFrom(treeItem->child(i));
-
-            }
-
-            for (int n = 0; n < lastPBuff.count(); n++){
-                lastParents.append(lastPBuff.at(n));
-
-            }
-
-        }
-
-    }
-
-    return lastParents;
-}
-//----------------------------------------------------------------------------------------------------
-
-bool collectorWindow::isValidVariable(QTreeWidgetItem *treeItem)
-{
-    bool isValid = true;
-
-    if(treeItem->childCount()>1){
-
-        for(int i = 0; i < treeItem->childCount(); i++){
-
-            if (treeItem->child(i)->childCount() > 0){
-                isValid = false;
-                break;
-
-            }
-
-        }
-
-    }else{
-       isValid = false;
-
-    }
-
-    return isValid;
 }
 //----------------------------------------------------------------------------------------------------
 

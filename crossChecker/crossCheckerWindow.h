@@ -45,14 +45,9 @@ class crossCheckerWindow : public QMainWindow
 
 private:
     QStringList getSelectionChildren();
-    QStringList columnHeaders;
-    QStringList rowHeaders;
-    QList<QStringList> columnsCache;
-    QList<QStringList> clickedItemColumns();
     QStringList headerParents;
     QLabel *rowsParentLabel;
     QLabel *columnsParentLabel;
-    QLabel *andWithLabel;
 
     enum headerFor{
         rows,
@@ -63,12 +58,10 @@ private:
     void resetCache();
     void loadHeaderParent(int element, QString parentText);
     void loadStoredData();
-    QList<int> getSelectedIndexes();
     void createToolBar();
     iconsCatalog *icons;
     void createActions();
     void createMenus();
-    void writeTableToCache();  
     void closeEvent(QCloseEvent *event);
     bool hasChanges;
     void applyCoverageTo(QList<QStringList> *columnsList);
@@ -80,15 +73,11 @@ private:
     void writeColumnHeaders();
     void writeDataRows();
     bool writeHtmlTo(QString filePath);
-    int selectedColumn;
 
 public:
     explicit crossCheckerWindow(QWidget *parent = 0, QTreeWidgetItem *testItem = 0);
     static int instance;
-    void updateTable();
 
-    QAction *shiftUpAction;
-    QAction *shiftDownAction;
     QAction *coverAllAction;
     QAction *pickRowHeadersAction;
     QAction *pickColumnHeadersAction;
@@ -100,8 +89,6 @@ public:
     QAction *moveColumnLeftAction;
     QAction *moveColumnRightAction;
     QAction *exportCheckerAction;
-    QAction *clearHighlightsAction;
-    QAction *andAction;
 
     QTreeWidgetItem *activeTestItem;
     static QTreeWidgetItem *clickedItem;
@@ -112,21 +99,17 @@ signals:
     void saved();
 
 public slots:
-    void shiftSelectedUp();
-    void shiftSelectedDown();
     void coverAll();
     void pickColumnHeadersFromTree();
     void pickRowHeadersFromTree();
     void coverSelected();
-    void storeChecker();
+    void saveChecker();
     void showHelp();
     void clearTable();
     void deleteSelectedColumns();
     void moveColumnLeft();
     void moveColumnRight();
     void exportChecker();
-    void andWithSelected();
-    void clearHighlights();
 };
 
 #endif // CROSSCHECKERWINDOW_H

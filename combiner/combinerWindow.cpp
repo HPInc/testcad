@@ -31,6 +31,7 @@ combinerWindow::combinerWindow(QWidget *parent, QTreeWidgetItem *testItem) : QMa
 {
     table = new dataTable();
     table->setSelectionBehavior(QAbstractItemView::SelectColumns);
+    table->skipEmptyCells = true;
     this->setCentralWidget(table);
     this->setWindowTitle(testItem->text(0));
     this->setWindowIcon(QIcon(":/icons/combinationIcon.png"));
@@ -56,7 +57,45 @@ combinerWindow::combinerWindow(QWidget *parent, QTreeWidgetItem *testItem) : QMa
 void combinerWindow::clearTable()
 {
     table->clear();
+    hasChanges = true;
+}
+//----------------------------------------------------------------------------------------------------
 
+void combinerWindow::deleteSelectedColumns()
+{
+    table->deleteSelectedColumns();
+    hasChanges = true;
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void combinerWindow::pickCollection()
+{
+    table->loadFromCollection(combinerWindow::clickedItem);
+    hasChanges = true;
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void combinerWindow::loadStoredData()
+{
+    table->loadFromData(activeTestItem->data(2,Qt::UserRole).toList());
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void combinerWindow::moveColumnRight()
+{
+    table->moveColumnRight();
+    hasChanges = true;
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void combinerWindow::moveColumnLeft()
+{
+    table->moveColumnLeft();
+    hasChanges = true;
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -208,29 +247,23 @@ void combinerWindow::fillDownSelected()
 }
 //----------------------------------------------------------------------------------------------------
 
-void combinerWindow::shiftSelected(int polarity)
+void combinerWindow::shiftSelected(shiftingDirection direction)
 {
     QStringList cBuff;
     QString shiftBuff;
 
-    if (polarity < 0){
-        polarity = -1;
-    }else{
-        polarity = 1;
-    }
-
     table->cacheTable();
-    QList<int> selIdxs = table->getSelectedIndexes();
+    QList<int> selIdxs = table->getSelectedIndexes(dataTable::selectionColumn);
 
     for (int i = 0; i < selIdxs.size(); i++){
         cBuff = table->columnsCache.at(selIdxs.at(i));
 
-        if (polarity > 0){
+        if (direction == combinerWindow::shiftDown){
             shiftBuff = cBuff.last();
             cBuff.removeLast();
             cBuff.prepend(shiftBuff);
 
-        }else{
+        }else if(direction == combinerWindow::shiftUp){
             shiftBuff = cBuff.first();
             cBuff.removeFirst();
             cBuff.append(shiftBuff);
@@ -251,51 +284,13 @@ void combinerWindow::shiftSelected(int polarity)
 
 void combinerWindow::shiftSelectedUp()
 {
-    shiftSelected(-1);
+    shiftSelected(combinerWindow::shiftUp);
 }
 //----------------------------------------------------------------------------------------------------
 
 void combinerWindow::shiftSelectedDown()
 {
-    shiftSelected(1);
-}
-//----------------------------------------------------------------------------------------------------
-
-void combinerWindow::deleteSelectedColumns()
-{
-    table->deleteSelectedColumns();
-    hasChanges = true;
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void combinerWindow::pickCollection()
-{
-    table->loadFromCollection(combinerWindow::clickedItem);
-    hasChanges = true;
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void combinerWindow::loadStoredData()
-{
-    table->loadFromData(activeTestItem->data(2,Qt::UserRole).toList());
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void combinerWindow::moveColumnRight()
-{
-    table->moveColumnRight();
-    hasChanges = true;
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void combinerWindow::moveColumnLeft()
-{
-    table->moveColumnLeft();
-    hasChanges = true;
+    shiftSelected(combinerWindow::shiftDown);
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -561,7 +556,7 @@ int combinerWindow::getRandom(int upper)
 SelectionData combinerWindow::getSelectionData()
 {
     SelectionData selData;
-    QList<int> selIdxs = table->getSelectedIndexes();
+    QList<int> selIdxs = table->getSelectedIndexes(dataTable::selectionColumn);
     table->cacheTable();
 
     if (selIdxs.size() > 0){

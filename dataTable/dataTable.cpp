@@ -33,9 +33,183 @@ dataTable::dataTable()
 }
 //----------------------------------------------------------------------------------------------------
 
+void dataTable::deleteSelectedRows()
+{
+    cacheTable();
+    QList<int> selIdxs = getSelectedIndexes(dataTable::selectionRow);
+
+    pullOutRow(selIdxs.at(0));
+    rowHeaders.removeAt(selIdxs.at(0));
+    loadFromCache();
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveRow(movingDirection direction)
+{
+    cacheTable();
+
+    QStringList rowBuff;
+    QString headerToMove;
+    int nextPosIdx;
+    QList<int> selIdxs = getSelectedIndexes(dataTable::selectionRow);
+
+    if (!selIdxs.isEmpty()){
+        int idx = selIdxs.at(0);
+        headerToMove = rowHeaders.at(idx);
+        rowHeaders.removeAt(idx);
+        rowBuff = pullOutRow(idx);
+
+        if (direction == dataTable::movingDown){
+            nextPosIdx = idx + 1;
+
+        }else if (direction == dataTable::movingUp){
+            nextPosIdx = idx - 1;
+
+        }
+
+        if (nextPosIdx < 0){
+            rowHeaders.append(headerToMove);
+            nextPosIdx = rowHeaders.size()-1;
+
+        }else if(nextPosIdx > rowHeaders.size()){
+            rowHeaders.insert(0, headerToMove);
+            nextPosIdx = 0;
+
+        }else{
+            rowHeaders.insert(nextPosIdx, headerToMove);
+
+        }
+
+        insertRow(rowBuff, nextPosIdx);
+
+        loadFromCache();
+        selectRow(nextPosIdx);
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveRowUp()
+{
+    moveRow(dataTable::movingUp);
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::moveRowDown()
+{
+    moveRow(dataTable::movingDown);
+}
+//----------------------------------------------------------------------------------------------------
+
+QStringList dataTable::pullOutRow(int rowIndex)
+{
+    QStringList colBuff;
+    QStringList rowBuff;
+
+    for (int j = 0; j < columnsCache.size(); j++){
+        colBuff = columnsCache.at(j);
+        rowBuff.append(colBuff.at(rowIndex));
+        colBuff.removeAt(rowIndex);
+        columnsCache.replace(j,colBuff);
+
+    }
+
+    return rowBuff;
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::insertRow(QStringList rowData, int insertionIndex)
+{
+    QStringList colBuff;
+
+    for (int i = 0; i < rowData.size(); i++){
+        colBuff = columnsCache.at(i);
+
+        if (insertionIndex < 0){
+            colBuff.append(rowData.at(i));
+
+        }else if(insertionIndex > colBuff.size()){
+            colBuff.insert(0, rowData.at(i));
+
+        }else{
+            colBuff.insert(insertionIndex, rowData.at(i));
+
+        }
+
+        columnsCache.replace(i, colBuff);
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::cacheTable()
+{
+    columnHeaders = getColumnHeaders();
+    rowHeaders = getRowHeaders();
+    columnsCache = getColumnValues();
+    QStringList colWithBlanks;
+    QStringList colWithoutBlanks;
+
+    for (int i = 0; i < columnsCache.size(); i++){
+        colWithBlanks = columnsCache.at(i);
+
+        for (int j = 0; j < colWithBlanks.size(); j++){
+
+            if ((!colWithBlanks.at(j).isEmpty()) || !skipEmptyCells){
+                colWithoutBlanks.append(colWithBlanks.at(j));
+
+            }
+        }
+
+        columnsCache.replace(i, colWithoutBlanks);
+        colWithoutBlanks.clear();
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::addRow()
+{
+    if (!columnsCache.isEmpty()){
+        QStringList cbff;
+        cacheTable();
+
+        for(int i = 0; i < columnsCache.size(); i++){
+            cbff = columnsCache.at(i);
+            cbff.append("");
+            columnsCache.replace(i, cbff);
+
+        }
+        loadFromCache();
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void dataTable::addColumn()
+{
+    bool ok;
+    QString dialogCaption = tr("Adding a column...");
+    QString headerText = QInputDialog::getText(this, dialogCaption,tr("Header text"),QLineEdit::Normal,"",&ok);
+
+    if(ok){
+
+        if (headerText.isEmpty()){
+            QMessageBox msg(QMessageBox::Critical, dialogCaption,
+                            tr("You must provide a text for the header"),QMessageBox::Ok);
+            msg.exec();
+
+        }else{
+            cacheTable();
+            columnHeaders.append(headerText);
+            QStringList newColBuff;
+            newColBuff.append("");
+            columnsCache.append(newColBuff);
+            loadFromCache();
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
 void dataTable::deleteSelectedColumns()
 {
-    QList<int> selectedIdexes = getSelectedIndexes();
+    QList<int> selectedIdexes = getSelectedIndexes(dataTable::selectionColumn);
 
     for (int i = 0; i < selectedIdexes.size(); i++){
         columnHeaders.removeAt(selectedIdexes.at( selectedIdexes.size() - 1 - i ) );
@@ -199,26 +373,27 @@ bool dataTable::isValidVariable(QTreeWidgetItem *treeItem)
 }
 //----------------------------------------------------------------------------------------------------
 
-void dataTable::moveColumn(int polarity)
+void dataTable::moveColumn(movingDirection direction)
 {
-    QList<int> selectedIdexes = getSelectedIndexes();
+    QList<int> selectedIdexes = getSelectedIndexes(dataTable::selectionColumn);
     QString headerToMove;
     QStringList columnToMove;
     int nextPosIdx;
     cacheTable();
-
-    if (polarity < 0){
-        polarity = -1;
-    }else{
-        polarity = 1;
-    }
 
     for (int i = 0; i < selectedIdexes.size(); i++){
         headerToMove = columnHeaders.at(selectedIdexes.at(i));
         columnToMove = columnsCache.at(selectedIdexes.at(i));
         columnHeaders.removeAt(selectedIdexes.at(i));
         columnsCache.removeAt(selectedIdexes.at(i));
-        nextPosIdx = selectedIdexes.at(i) + polarity;
+
+        if (direction == dataTable::movingLeft){
+            nextPosIdx = selectedIdexes.at(i) -1;
+
+        }else if (direction == dataTable::movingRight){
+            nextPosIdx = selectedIdexes.at(i) +1;
+
+        }
 
         if (nextPosIdx > columnsCache.size()){
             columnHeaders.prepend(headerToMove);
@@ -270,57 +445,43 @@ void dataTable::loadFromData(QList<QVariant> tableData)
 
 void dataTable::moveColumnRight()
 {
-    moveColumn(1);
+    moveColumn(dataTable::movingRight);
 }
 //----------------------------------------------------------------------------------------------------
 
 void dataTable::moveColumnLeft()
 {
-    moveColumn(-1);
+    moveColumn(dataTable::movingLeft);
 }
 //----------------------------------------------------------------------------------------------------
 
-QList<int> dataTable::getSelectedIndexes()
+QList<int> dataTable::getSelectedIndexes(selectionType selection)
 {
     QList<int> selectedIdexes;
 
     if (model->hasIndex(0,0)){
         QModelIndex index;
-        QModelIndexList indexes = currentSelection->selectedColumns();
+        QModelIndexList indexes;
 
-        foreach (index, indexes){
-            selectedIdexes.append(index.column());
+        if (selection == dataTable::selectionColumn){
+            indexes = currentSelection->selectedColumns();
 
+            foreach (index, indexes){
+                selectedIdexes.append(index.column());
+
+            }
+
+        }else if(selection == dataTable::selectionRow){
+            indexes = currentSelection->selectedRows();
+
+            foreach (index, indexes){
+                selectedIdexes.append(index.row());
+
+            }
         }
     }
 
     return selectedIdexes;
-}
-//----------------------------------------------------------------------------------------------------
-
-void dataTable::cacheTable()
-{
-    columnHeaders = getColumnHeaders();
-    rowHeaders = getRowHeaders();
-    columnsCache = getColumnValues();
-    QStringList colWithBlanks;
-    QStringList colWithoutBlanks;
-
-    for (int i = 0; i < columnsCache.size(); i++){
-        colWithBlanks = columnsCache.at(i);
-
-        for (int j = 0; j < colWithBlanks.size(); j++){
-
-            if (!colWithBlanks.at(j).isEmpty()){
-                colWithoutBlanks.append(colWithBlanks.at(j));
-
-            }
-        }
-
-        columnsCache.replace(i, colWithoutBlanks);
-        colWithoutBlanks.clear();
-    }
-
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -333,9 +494,6 @@ void dataTable::loadFromCache()
     update();
 
 }
-//----------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 
 void dataTable::andByCells(QList<QStringList> valuesByColumn)

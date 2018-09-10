@@ -5,7 +5,7 @@
 
 #define STRING_TESTCAD "testCAD"
 #define STRING_VERSION "Version:"
-#define STRING_VERSION_NUMBER "6.4.1"
+#define STRING_VERSION_NUMBER "6.4.3"
 #define STRING_AUTHORS "Bladimir de la Hoz Matveeva\r"
 
 #define STRING_HISTORY_FILE "testCAD.history"

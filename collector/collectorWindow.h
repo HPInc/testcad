@@ -44,22 +44,13 @@ class collectorWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
-    bool isValidVariable(QTreeWidgetItem *treeItem);
-    QList<QTreeWidgetItem*> variables;
-    QList<QStringList> columnsCache;
-    QList<QStringList> clickedItemColumns();
-    QStringList columnHeaders;
     void loadStoredData();
-    QList<int> getSelectedIndexes();
     void createToolBar();
     iconsCatalog *icons;
     void createActions();
     void createMenus();
-    void writeTableToCache();  
     void closeEvent(QCloseEvent *event);
     bool hasChanges;
-    int selectedColumn;
 
     QXmlStreamWriter *xmlWriter;
     void writeHtmlStyle();
@@ -71,21 +62,18 @@ private:
 public:
     explicit collectorWindow(QWidget *parent = 0, QTreeWidgetItem *testItem = 0);
     static int instance;
-    void updateTable();
 
     QAction *addColumnAction;
     QAction *addRowAction;
-    QAction *shiftUpAction;
-    QAction *shiftDownAction;
     QAction *saveCollectionAction;
     QAction *pickVariablesAction;
+    QAction *pickCollectionAction;
     QAction *showHelpAction;
     QAction *clearTableAction;
     QAction *deleteSelectedColumnsAction;
     QAction *moveColumnLeftAction;
     QAction *moveColumnRightAction;
     QAction *exportCollectionAction;
-    QAction *clearHighlightsAction;
 
     QTreeWidgetItem *activeTestItem;
     static QTreeWidgetItem *clickedItem;
@@ -98,9 +86,8 @@ signals:
 public slots:
     void addColumn();
     void addRow();
-    void shiftSelectedUp();
-    void shiftSelectedDown();
     void pickFromTree();
+    void pickCollection();
     void storeCollection();
     void showHelp();
     void clearTable();
@@ -108,7 +95,6 @@ public slots:
     void moveColumnLeft();
     void moveColumnRight();
     void exportCollection();
-    void clearHighlights();
 
 };
 

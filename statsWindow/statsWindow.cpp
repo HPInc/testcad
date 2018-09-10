@@ -39,7 +39,6 @@ statsWindow::statsWindow(QWidget *parent, QList<statistics> *treeStatistics) : Q
     createMenus();
     createToolBar();
     statusBar()->show();
-    selectedRow = -1;
     loadStatistics(treeStatistics);
 
 }
@@ -47,104 +46,73 @@ statsWindow::statsWindow(QWidget *parent, QList<statistics> *treeStatistics) : Q
 
 void statsWindow::moveRowUp()
 {
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedRowsIds();
-    int selectedRowId = selIdxs.at(0);
-    QStringList colBuff;
-    QStringList rowBuff;
-    QString headerToMove;
-    int nextPosIdx;
-
-    headerToMove = rowHeaders.at(selectedRowId);
-    rowHeaders.removeAt(selectedRowId);
-
-    for (int j = 0; j < columnsCache.size(); j++){
-        colBuff = columnsCache.at(j);
-        rowBuff.append(colBuff.at(selectedRowId));
-        colBuff.removeAt(selectedRowId);
-        columnsCache.replace(j,colBuff);
-
-    }
-
-    nextPosIdx = selectedRowId - 1;
-
-    if (nextPosIdx < 0){
-        rowHeaders.append(headerToMove);
-
-        for (int j = 0; j < rowBuff.size(); j++){
-            colBuff = columnsCache.at(j);
-            colBuff.append(rowBuff.at(j));
-            columnsCache.replace(j, colBuff);
-
-        }
-
-        nextPosIdx = rowHeaders.size()-1;
-
-    }else{
-        rowHeaders.insert(nextPosIdx,headerToMove);
-
-        for (int j = 0; j < rowBuff.size(); j++){
-            colBuff = columnsCache.at(j);
-            colBuff.insert(nextPosIdx, rowBuff.at(j));
-            columnsCache.replace(j, colBuff);
-
-        }
-
-    }
-
-    selectedRow = nextPosIdx;
-    updateTable();
+    table->moveRowUp();
 }
 //----------------------------------------------------------------------------------------------------
 
 void statsWindow::moveRowDown()
 {
-    writeTableToCache();
-    QList<int> selIdxs = getSelectedRowsIds();
-    int selectedRowId = selIdxs.at(0);
-    QStringList colBuff;
-    QStringList rowBuff;
-    QString headerToMove;
-    int nextPosIdx;
-    int rowsCount = rowHeaders.size();
+    table->moveRowDown();
+}
+//----------------------------------------------------------------------------------------------------
 
-    headerToMove = rowHeaders.at(selectedRowId);
-    rowHeaders.removeAt(selectedRowId);
+void statsWindow::deleteSelectedRows()
+{
+    table->deleteSelectedRows();
+}
+//----------------------------------------------------------------------------------------------------
 
-    for (int j = 0; j < columnsCache.size(); j++){
-        colBuff = columnsCache.at(j);
-        rowBuff.append(colBuff.at(selectedRowId));
-        colBuff.removeAt(selectedRowId);
-        columnsCache.replace(j,colBuff);
+void statsWindow::loadStatistics(QList<statistics> *treeStatistics)
+{
+    QList<QStringList> valuesByRow;
+    QStringList rowVals;
+    int colCount;
+
+    setStatsHeaders();
+    table->rowHeaders.clear();
+
+    for (int i = 0; i < treeStatistics->size(); i++){
+        table->rowHeaders.append(treeStatistics->at(i).componentName);
+        rowVals.append(treeStatistics->at(i).variablesCount);
+        rowVals.append(treeStatistics->at(i).fullCombinationSize);
+        rowVals.append(treeStatistics->at(i).pending);
+        rowVals.append(treeStatistics->at(i).pendingPercent);
+        rowVals.append(treeStatistics->at(i).planned);
+        rowVals.append(treeStatistics->at(i).plannedPercent);
+        rowVals.append(treeStatistics->at(i).review);
+        rowVals.append(treeStatistics->at(i).reviewPercent);
+        rowVals.append(treeStatistics->at(i).validated);
+        rowVals.append(treeStatistics->at(i).validatedPercent);
+        rowVals.append(treeStatistics->at(i).failed);
+        rowVals.append(treeStatistics->at(i).failedPercent);
+        rowVals.append(treeStatistics->at(i).unsupported);
+        rowVals.append(treeStatistics->at(i).unsupportedPercent);
+        rowVals.append(treeStatistics->at(i).modulesCount);
+        rowVals.append(treeStatistics->at(i).entriesCount);
+
+        colCount = rowVals.size();
+        valuesByRow.append(rowVals);
+        rowVals.clear();
 
     }
 
-    nextPosIdx = selectedRowId + 1;
+    table->columnsCache.clear();
 
-    if (nextPosIdx < rowsCount){
-        rowHeaders.insert(nextPosIdx, headerToMove);
+    for (int i = 0; i < colCount; i++){
+       QStringList colVals;
 
-        for (int j = 0; j < rowBuff.size(); j++){
-            colBuff = columnsCache.at(j);
-            colBuff.insert(nextPosIdx, rowBuff.at(j));
-            columnsCache.replace(j, colBuff);
+       for(int j = 0; j < valuesByRow.size(); j++){
+           rowVals = valuesByRow.at(j);
+           colVals.append(rowVals.at(i));
 
-        }
+       }
 
-    }else{
-        rowHeaders.insert(0,headerToMove);
+       table->columnsCache.append(colVals);
 
-        for (int j = 0; j < rowBuff.size(); j++){
-            colBuff = columnsCache.at(j);
-            colBuff.insert(0, rowBuff.at(j));
-            columnsCache.replace(j, colBuff);
-
-        }
-        nextPosIdx = 0;
     }
 
-    selectedRow = nextPosIdx;
-    updateTable();
+    table->loadFromCache();
+
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -176,8 +144,8 @@ void statsWindow::writeColumnHeaders()
     xmlWriter->writeStartElement("tr");
     xmlWriter->writeTextElement("th","Component");
 
-    for (int i = 0; i < columnHeaders.size(); i++){
-        xmlWriter->writeTextElement("th",columnHeaders.at(i));
+    for (int i = 0; i < table->columnHeaders.size(); i++){
+        xmlWriter->writeTextElement("th",table->columnHeaders.at(i));
 
     }
 
@@ -192,11 +160,11 @@ void statsWindow::writeDataRows()
     for (int i = 0; i < table->rowCount(); i++){
         xmlWriter->writeStartElement("tr");
         xmlWriter->writeStartElement("td");
-        xmlWriter->writeCharacters(rowHeaders.at(i));
+        xmlWriter->writeCharacters(table->rowHeaders.at(i));
         xmlWriter->writeEndElement();
 
-        for (int j = 0; j < columnsCache.size(); j++){
-            colBuff = columnsCache.at(j);
+        for (int j = 0; j < table->columnsCache.size(); j++){
+            colBuff = table->columnsCache.at(j);
             xmlWriter->writeStartElement("td");
 
             if(i < colBuff.size()){
@@ -222,7 +190,7 @@ bool statsWindow::writeHtmlTo(QString filePath)
 
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this,STRING_TESTCAD,
-                             QObject::tr(STRING_CANNOT_WRITE_FILE)
+                             QObject::tr("Cannot write file...")
                              .arg(filePath)
                              .arg(file.errorString()));
 
@@ -258,123 +226,7 @@ void statsWindow::closeEvent(QCloseEvent *event)
 //--------------------------------------------------------------------------------------------------------------------------------
 
 int statsWindow::instance = 0;
-//----------------------------------------------------------------------------------------------------
 
-void statsWindow::loadStatistics(QList<statistics> *treeStatistics)
-{
-    QList<QStringList> valuesByRow;
-    QStringList rowVals;
-    int colCount;
-
-    setColumnsHeaders();
-    rowHeaders.clear();
-
-    for (int i = 0; i < treeStatistics->size(); i++){
-        rowHeaders.append(treeStatistics->at(i).componentName);
-        rowVals.append(treeStatistics->at(i).variablesCount);
-        rowVals.append(treeStatistics->at(i).fullCombinationSize);
-        rowVals.append(treeStatistics->at(i).pending);
-        rowVals.append(treeStatistics->at(i).pendingPercent);
-        rowVals.append(treeStatistics->at(i).planned);
-        rowVals.append(treeStatistics->at(i).plannedPercent);
-        rowVals.append(treeStatistics->at(i).review);
-        rowVals.append(treeStatistics->at(i).reviewPercent);
-        rowVals.append(treeStatistics->at(i).validated);
-        rowVals.append(treeStatistics->at(i).validatedPercent);
-        rowVals.append(treeStatistics->at(i).failed);
-        rowVals.append(treeStatistics->at(i).failedPercent);
-        rowVals.append(treeStatistics->at(i).unsupported);
-        rowVals.append(treeStatistics->at(i).unsupportedPercent);
-        rowVals.append(treeStatistics->at(i).modulesCount);
-        rowVals.append(treeStatistics->at(i).entriesCount);
-
-        colCount = rowVals.size();
-        valuesByRow.append(rowVals);
-        rowVals.clear();
-
-    }
-
-    columnsCache.clear();
-
-    for (int i = 0; i < colCount; i++){
-       QStringList colVals;
-
-       for(int j = 0; j < valuesByRow.size(); j++){
-           rowVals = valuesByRow.at(j);
-           colVals.append(rowVals.at(i));
-
-       }
-
-       columnsCache.append(colVals);
-
-    }
-
-    updateTable();
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::setColumnsHeaders()
-{
-    columnHeaders.clear();
-    columnHeaders.append("Variables");
-    columnHeaders.append("Combinations");
-    columnHeaders.append("Pending");
-    columnHeaders.append("Pending %");
-    columnHeaders.append("Planned");
-    columnHeaders.append("Planned %");
-    columnHeaders.append("Review");
-    columnHeaders.append("Review %");
-    columnHeaders.append("Validated");
-    columnHeaders.append("Validated %");
-    columnHeaders.append("Failed");
-    columnHeaders.append("Failed %");
-    columnHeaders.append("Unsupported");
-    columnHeaders.append("Unsupported %");
-    columnHeaders.append("Modules");
-    columnHeaders.append("Entries");
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::updateTable()
-{
-    table->clear();
-    table->setColumnHeaders(columnHeaders);
-    table->setRowHeaders(rowHeaders);
-    table->setColumnValues(columnsCache);
-    table->update();
-
-    if (selectedRow > -1){
-        table->selectRow(selectedRow);
-        selectedRow = -1;
-
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::writeTableToCache()
-{
-    columnHeaders = table->getColumnHeaders();
-    columnsCache = table->getColumnValues();
-    QStringList colWithBlanks;
-    QStringList colWithoutBlanks;
-
-    for (int i = 0; i < columnsCache.size(); i++){
-        colWithBlanks = columnsCache.at(i);
-
-        for (int j = 0; j < colWithBlanks.size(); j++){
-
-            if (!colWithBlanks.at(j).isEmpty()){
-                colWithoutBlanks.append(colWithBlanks.at(j));
-
-            }
-        }
-
-        columnsCache.replace(i, colWithoutBlanks);
-        colWithoutBlanks.clear();
-    }
-
-}
 //----------------------------------------------------------------------------------------------------
 
 void statsWindow::exportStats()
@@ -383,7 +235,7 @@ void statsWindow::exportStats()
                                          QDir::currentPath(),
                                          QObject::tr(STRING_FILETYPE_HTML));
 
-    writeTableToCache();
+    table->cacheTable();
 
     if (!filePath.endsWith(".html"))
         filePath = filePath + ".html";
@@ -402,59 +254,6 @@ void statsWindow::exportStats()
 }
 //----------------------------------------------------------------------------------------------------
 
-void statsWindow::createToolBar()
-{
-    QToolBar *tb = this->addToolBar(tr("Tools"));
-    tb->setMovable(false);
-    tb->addAction(exportStatsAction);
-    tb->addSeparator();
-    tb->addAction(shiftUpAction);
-    tb->addAction(shiftDownAction);
-    tb->addSeparator();
-    tb->addAction(deleteSelectedRowsAction);
-
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::deleteSelectedRows()
-{
-    QList<int> selIdxs = getSelectedRowsIds();
-    QStringList colBuff;
-
-    for (int i = 0; i < selIdxs.size(); i++){
-        rowHeaders.removeAt(selIdxs.at( selIdxs.size() - 1 - i ) );
-
-        for (int j = 0; j < columnsCache.size(); j++){
-            colBuff = columnsCache.at(j);
-            colBuff.removeAt(selIdxs.at( selIdxs.size() - 1 - i ));
-            columnsCache.replace(j,colBuff);
-
-        }
-    }
-
-    updateTable();
-
-}
-//----------------------------------------------------------------------------------------------------
-
-QList<int> statsWindow::getSelectedRowsIds()
-{
-    QList<int> selIdxs;
-
-    if (table->model->hasIndex(0,0)){
-        QModelIndex index;
-        QModelIndexList indexes = table->currentSelection->selectedRows();
-
-        foreach (index, indexes){
-            selIdxs.append(index.row());
-
-        }
-    }
-
-    return selIdxs;
-}
-//----------------------------------------------------------------------------------------------------
-
 void statsWindow::showHelp()
 {
     QString statsHelp = tr("Your system is composed by:<ul>"\
@@ -466,6 +265,20 @@ void statsWindow::showHelp()
                            "The <b>Statistics Table</b> shows cuantitative data about your system composition and state.");
 
     QMessageBox::about(this,tr("System statistics"), statsHelp);
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void statsWindow::createToolBar()
+{
+    QToolBar *tb = this->addToolBar(tr("Tools"));
+    tb->setMovable(false);
+    tb->addAction(exportStatsAction);
+    tb->addSeparator();
+    tb->addAction(moveUpAction);
+    tb->addAction(moveDownAction);
+    tb->addSeparator();
+    tb->addAction(deleteSelectedRowsAction);
 
 }
 //----------------------------------------------------------------------------------------------------
@@ -483,11 +296,11 @@ void statsWindow::createActions()
     deleteSelectedRowsAction= new QAction(icons->deleteIcon, tr("Delete selected rows"),this);
     connect(deleteSelectedRowsAction,SIGNAL(triggered()),this,SLOT(deleteSelectedRows()));
 
-    shiftUpAction = new QAction(icons->upIcon, tr("Move up"),this);
-    connect(shiftUpAction,SIGNAL(triggered()),this,SLOT(moveRowUp()));
+    moveUpAction = new QAction(icons->upIcon, tr("Move up"),this);
+    connect(moveUpAction,SIGNAL(triggered()),this,SLOT(moveRowUp()));
 
-    shiftDownAction = new QAction(icons->downIcon, tr("Move down"),this);
-    connect(shiftDownAction,SIGNAL(triggered()),this,SLOT(moveRowDown()));
+    moveDownAction = new QAction(icons->downIcon, tr("Move down"),this);
+    connect(moveDownAction,SIGNAL(triggered()),this,SLOT(moveRowDown()));
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -497,12 +310,34 @@ void statsWindow::createMenus()
 
     QMenu *columnsMenu = mb->addMenu(tr("Rows"));
         columnsMenu->addAction(deleteSelectedRowsAction);
-        columnsMenu->addAction(shiftUpAction);
-        columnsMenu->addAction(shiftDownAction);
+        columnsMenu->addAction(moveUpAction);
+        columnsMenu->addAction(moveDownAction);
 
     QMenu *helpMenu = mb->addMenu(tr("Help"));
         helpMenu->addAction(showHelpAction);
 
+}
+//----------------------------------------------------------------------------------------------------
+
+void statsWindow::setStatsHeaders()
+{
+    table->columnHeaders.clear();
+    table->columnHeaders.append("Variables");
+    table->columnHeaders.append("Combinations");
+    table->columnHeaders.append("Pending");
+    table->columnHeaders.append("Pending %");
+    table->columnHeaders.append("Planned");
+    table->columnHeaders.append("Planned %");
+    table->columnHeaders.append("Review");
+    table->columnHeaders.append("Review %");
+    table->columnHeaders.append("Validated");
+    table->columnHeaders.append("Validated %");
+    table->columnHeaders.append("Failed");
+    table->columnHeaders.append("Failed %");
+    table->columnHeaders.append("Unsupported");
+    table->columnHeaders.append("Unsupported %");
+    table->columnHeaders.append("Modules");
+    table->columnHeaders.append("Entries");
 }
 //----------------------------------------------------------------------------------------------------
 

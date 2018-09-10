@@ -50,9 +50,9 @@ splashWindow::splashWindow(QWidget *parent) : QMainWindow(parent)
     this->resize(gsc->width(),gsc->height());
     this->setFixedSize(this->size());
     this->setWindowFlags(Qt::FramelessWindowHint);
-    QRect screenGeometry = QApplication::desktop()->screenGeometry();
-    int x = (screenGeometry.width()-this->width()) / 2;
-    int y = (screenGeometry.height()-this->height()) / 2;
+
+    int x = (parent->width()-this->width()) / 2;
+    int y = (parent->height()-this->height()) / 2;
     this->move(x, y);
 
     QTimer *timer = new QTimer(this);

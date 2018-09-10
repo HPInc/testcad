@@ -32,6 +32,8 @@
 #include <QList>
 #include <QAction>
 #include <QTreeWidgetItem>
+#include <QInputDialog>
+#include <QMessageBox>
 #include "dataTable/tableModel.h"
 
 class CollectionData{
@@ -47,6 +49,12 @@ class dataTable : public QTableView{
 public:
     dataTable();
     tableModel *model;
+
+    enum selectionType{
+        selectionColumn,
+        selectionRow
+    };
+
     void clear();
     void setColumnHeaders(QStringList columnHeaders);
     void setRowHeaders(QStringList rowHeaders);
@@ -65,7 +73,7 @@ public:
     void setCellBackground(int cellRow, int cellColumn, QColor cellColor);
     QList<bool> andByRows(QList<QStringList> valuesByColumn);
     void andByCells(QList<QStringList> valuesByColumn);
-    QList<int> getSelectedIndexes();
+    QList<int> getSelectedIndexes(selectionType selection);
     void moveColumnRight();
     void moveColumnLeft();
     void deleteSelectedColumns();
@@ -78,10 +86,27 @@ public:
     void cacheTable();
     void loadFromCache();
     void update();
+    void addRow();
+    void addColumn();
+    bool skipEmptyCells = false;
+    void deleteSelectedRows();
+    void moveRowUp();
+    void moveRowDown();
+    QStringList pullOutRow(int rowIndex);
+    void insertRow(QStringList rowData, int insertionIndex);
 
 private:
+
+    enum movingDirection{
+        movingRight,
+        movingLeft,
+        movingUp,
+        movingDown
+    };
+
     QList< QColor > getColumnBackground(int columnIndex);
-    void moveColumn(int polarity);
+    void moveColumn(movingDirection direction);
+    void moveRow(movingDirection direction);
 
     QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
     bool isValidVariable(QTreeWidgetItem *treeItem);
