@@ -8,10 +8,10 @@ layout: default
 
 #### Do you share our [vision ?](https://www.istqb.org/about-as/vision-mission.html)
 
-### 1. Download testCAD 6.4.0
+### 1. Download testCAD 6.4.4
 
 
-[![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.4.0.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.4.0.zip)
+[![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.4.0.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.4.4.zip)
 
 
 ### 2. Picture your system
