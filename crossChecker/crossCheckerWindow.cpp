@@ -51,6 +51,94 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
 
 }
 //----------------------------------------------------------------------------------------------------
+QString crossCheckerWindow::getTagFromUser()
+{
+    QStringList tags;
+    tags << tr("Current Date") << "X" << tr("Custom value");
+
+    bool ok;
+    QString tag = QInputDialog::getItem(this, tr("Cover the table using..."),
+                                            tr("Tag:"), tags, 0, false, &ok);
+    if (ok && !tag.isEmpty()){
+
+        if(tag == tr("Current Date")){
+            tag = QDate::currentDate().toString("yyyy/MM/dd");
+
+        }else if(tag == "X"){
+            tag = "X";
+
+        }else{
+            tag = QInputDialog::getText(this, tr("Enter custom value"),
+                                        tr("Value:"), QLineEdit::Normal,
+                                        "X", &ok);
+            if (ok && !tag.isEmpty()){
+                return tag;
+
+            }else{
+                return "";
+
+            }
+        }
+
+        return tag;
+
+    }else{
+        return "";
+
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::applyCoverageTo(QList<QStringList> *columnsList)
+{
+    table->cacheTable();
+
+    if(columnsList->size() * table->rowHeaders.size() > 0){
+        bool ok;
+        QString tag = getTagFromUser();
+
+        if (!tag.isEmpty()){
+            int cov = QInputDialog::getInt(this,tr("Cover empty cells"),tr("Coverage percent"),33,1,100,1,&ok);
+
+            if(ok){
+                int nCells = columnsList->size() * table->rowHeaders.size();
+                int toCover = qRound(nCells * static_cast<double>(cov/100.0));
+                int byCol = qRound(static_cast<double>(toCover / columnsList->size()));
+                if (byCol == 0) byCol = 1;
+                QStringList colBuff;
+                int n;
+                int row = 0;
+
+                for (int i = 0; i < columnsList->size(); i++){
+                    colBuff = columnsList->at(i);
+                    n = 0;
+
+                    for(int j = row; j < colBuff.size(); j++){
+
+                        if (colBuff.at(j)==""){
+                            colBuff.replace(j,tag);
+                            n++;
+                        }
+
+                        row++;
+                        if(row == colBuff.size()) row = 0;
+                        if(n == byCol) break;
+                    }
+
+                    columnsList->replace(i,colBuff);
+                }
+            }
+        }
+
+    }else{
+        QMessageBox msg(QMessageBox::Information, tr("Cross checker."), tr("Design is empty..."), QMessageBox::Ok);
+        msg.resize(200,100);
+        msg.exec();
+        statusBar()->showMessage(tr("Selection is empty..."), 2000);
+
+    }
+}
+//----------------------------------------------------------------------------------------------------
 
 void crossCheckerWindow::saveChecker()
 {
@@ -164,54 +252,6 @@ void crossCheckerWindow::moveColumnRight()
 {
     table->moveColumnRight();
     hasChanges = true;
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::applyCoverageTo(QList<QStringList> *columnsList)
-{
-    table->cacheTable();
-
-    if(columnsList->size() * table->rowHeaders.size() > 0){
-        bool ok;
-        int cov = QInputDialog::getInt(this,tr("Set coverage"),tr("Coverage percent"),33,1,100,1,&ok);
-
-        if(ok){
-            int nCells = columnsList->size() * table->rowHeaders.size();
-            int toCover = qRound(nCells * static_cast<double>(cov/100.0));
-            int byCol = qRound(static_cast<double>(toCover / columnsList->size()));
-            if (byCol == 0) byCol = 1;
-            QString tag = QDate::currentDate().toString("yyyy/MM/dd");
-            QStringList colBuff;
-            int n;
-            int row = 0;
-
-            for (int i = 0; i < columnsList->size(); i++){
-                colBuff = columnsList->at(i);
-                n = 0;
-
-                for(int j = row; j < colBuff.size(); j++){
-
-                    if (colBuff.at(j)==""){
-                        colBuff.replace(j,tag);
-                        n++;
-                    }
-
-                    row++;
-                    if(row == colBuff.size()) row = 0;
-                    if(n == byCol) break;
-                }
-
-                columnsList->replace(i,colBuff);
-            }
-        }
-
-    }else{
-        QMessageBox msg(QMessageBox::Information, tr("Cross checker."), tr("Design is empty..."), QMessageBox::Ok);
-        msg.resize(200,100);
-        msg.exec();
-        statusBar()->showMessage(tr("Design is empty..."), 2000);
-
-    }
 }
 //----------------------------------------------------------------------------------------------------
 

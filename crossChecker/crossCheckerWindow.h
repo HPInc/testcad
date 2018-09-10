@@ -65,6 +65,7 @@ private:
     void closeEvent(QCloseEvent *event);
     bool hasChanges;
     void applyCoverageTo(QList<QStringList> *columnsList);
+    QString getTagFromUser();
 
     QXmlStreamWriter *xmlWriter;
 
