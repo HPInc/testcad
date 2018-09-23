@@ -62,6 +62,26 @@ public:
 
 };
 
+class treeItemChildrenCount{
+
+public:
+    int modulesCount = 0;
+    int entriesCount = 0;
+
+};
+
+class variableStatistics{
+
+public:
+    int variablesCount = 0;
+    int valuesCount = 0;
+    int higherValuesCount = 0;
+    double possibleCombinations = 0;
+    QString variablesTree = "";
+    QStringList variables;
+
+};
+
 class statsWindow : public QMainWindow
 {
     Q_OBJECT
@@ -83,11 +103,17 @@ private:
 
     void closeEvent(QCloseEvent *event);
 
-public:
-    statsWindow(QWidget *parent = 0, QList<statistics> *treeStatistics = 0);
-    void loadStatistics(QList<statistics> *treeStatistics);
-    static int instance;
+    treeItemChildrenCount childrenCountOf(QTreeWidgetItem *treeItem);
+    int countOf(QTreeWidgetItem *treeItem, QString status);
+    QString percentOf(int count, int fromTotal);
+    QTreeWidget *tree;
 
+public:
+    statsWindow(QWidget *parent = 0, QTreeWidget *tree = 0);
+    variableStatistics getVariableStatistics(QTreeWidgetItem *treeItem);
+    QList<statistics> getStatistics();
+    void loadTable();
+    static int instance;
     QAction *moveUpAction;
     QAction *moveDownAction;
     QAction *showHelpAction;

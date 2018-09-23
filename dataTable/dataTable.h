@@ -94,6 +94,8 @@ public:
     void moveRowDown();
     QStringList pullOutRow(int rowIndex);
     void insertRow(QStringList rowData, int insertionIndex);
+    QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
+    bool isValidVariable(QTreeWidgetItem *treeItem);
 
 private:
 
@@ -107,9 +109,6 @@ private:
     QList< QColor > getColumnBackground(int columnIndex);
     void moveColumn(movingDirection direction);
     void moveRow(movingDirection direction);
-
-    QList<QTreeWidgetItem *> getVariableItemsFrom(QTreeWidgetItem *treeItem);
-    bool isValidVariable(QTreeWidgetItem *treeItem);
     CollectionData getCollectionDataFrom(QTreeWidgetItem *treeItem);
 
 };

@@ -73,5 +73,6 @@
         <file>icons/addRowIcon.png</file>
         <file>icons/nandIcon.png</file>
         <file>icons/appIcon.ico</file>
+        <file>icons/pickVariablesIcon.png</file>
     </qresource>
 </RCC>

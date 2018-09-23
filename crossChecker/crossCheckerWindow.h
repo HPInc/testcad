@@ -37,6 +37,7 @@
 #include <QTime>
 #include "testCAD.h"
 #include "dataTable/dataTable.h"
+#include "statsWindow/statsWindow.h"
 #include "iconsCatalog.h"
 
 class crossCheckerWindow : public QMainWindow
@@ -54,7 +55,7 @@ private:
         columns,
     };
 
-    void setHeaderFor(int tablePart);
+    void setHeaderFor(int tablePart, QStringList headersList);
     void resetCache();
     void loadHeaderParent(int element, QString parentText);
     void loadStoredData();
@@ -82,6 +83,7 @@ public:
     QAction *coverAllAction;
     QAction *pickRowHeadersAction;
     QAction *pickColumnHeadersAction;
+    QAction *pickVariablesAction;
     QAction *saveCheckerAction;
     QAction *coverSelectedAction;
     QAction *showHelpAction;
@@ -90,6 +92,7 @@ public:
     QAction *moveColumnLeftAction;
     QAction *moveColumnRightAction;
     QAction *exportCheckerAction;
+    QAction *addColumnAction;
 
     QTreeWidgetItem *activeTestItem;
     static QTreeWidgetItem *clickedItem;
@@ -103,6 +106,7 @@ public slots:
     void coverAll();
     void pickColumnHeadersFromTree();
     void pickRowHeadersFromTree();
+    void pickVariables();
     void coverSelected();
     void saveChecker();
     void showHelp();
@@ -111,6 +115,7 @@ public slots:
     void moveColumnLeft();
     void moveColumnRight();
     void exportChecker();
+    void addColumn();
 };
 
 #endif // CROSSCHECKERWINDOW_H

@@ -39,56 +39,29 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QString;
 
-class treeItemChildrenCount{
-
-public:
-    int modulesCount = 0;
-    int entriesCount = 0;
-
-};
-
-class variableStatistics{
-
-public:
-    int variablesCount = 0;
-    int valuesCount = 0;
-    int higherValuesCount = 0;
-    double possibleCombinations = 0;
-    QString variablesTree = "";
-
-};
-
 class treeAnalyzer : public QObject
 {
     Q_OBJECT
 
 public:
     treeAnalyzer(QTreeWidget *tree);
-    QList<statistics> getStatisticsList();
     void showDiffWith(QHash<QString, QString> diffHashTable);
     void setClickedItem(QTreeWidgetItem *item);
 
 private:
-    treeItemChildrenCount childrenCountOf(QTreeWidgetItem *treeItem);
-    statsWindow *statisticsTable;
-    int countOf(QTreeWidgetItem *treeItem, QString status);
-    QString percentOf(int count, int fromTotal);
     int longestStatusLength();
     QString align(QString stringToFormat);
-
     QString getPathOf(QTreeWidgetItem *treeItem);
     QString getBranchesFrom(QTreeWidgetItem *treeItem, QString indent);
     QTreeWidgetItem *clickedItem;
     QTreeWidget *treeWidget;
-    QList<QTreeWidgetItem*> getVariableItemsFrom(QTreeWidgetItem *treeItem);
-    bool isValidVariable(QTreeWidgetItem *treeItem);
-    variableStatistics getVariableStatistics(QTreeWidgetItem *treeItem);
+    statsWindow *statisticsTable;
 
 public slots:
     void copyPathToClipBoard();
-    void showStatistics();
     void copyBranchToClipboard();
     void copyVariableStatisticsToClipboard();
+    void showStatistics();
 
 };
 

@@ -51,6 +51,78 @@ crossCheckerWindow::crossCheckerWindow(QWidget *parent, QTreeWidgetItem *testIte
 
 }
 //----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::addColumn()
+{
+    table->addColumn();
+    hasChanges = true;
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::pickVariables()
+{
+    statsWindow *statsTable = new statsWindow(0,0);
+    variableStatistics vs = statsTable->getVariableStatistics(clickedItem);
+
+    delete statsTable;
+
+    setHeaderFor(crossCheckerWindow::rows, vs.variables);
+
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::setHeaderFor(int tablePart, QStringList headersList)
+{
+    if (headersList.size() > 0){
+        table->cacheTable();
+
+        if(tablePart == crossCheckerWindow::rows){
+            table->rowHeaders = headersList;
+            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
+
+        }else if(tablePart == crossCheckerWindow::columns){
+            table->columnHeaders = headersList;
+            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
+
+        }
+
+        resetCache();
+        table->loadFromCache();
+        hasChanges = true;
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::pickColumnHeadersFromTree()
+{
+    setHeaderFor(crossCheckerWindow::columns, getSelectionChildren());
+}
+//----------------------------------------------------------------------------------------------------
+
+void crossCheckerWindow::pickRowHeadersFromTree()
+{
+    setHeaderFor(crossCheckerWindow::rows, getSelectionChildren());
+}
+//----------------------------------------------------------------------------------------------------
+
+QStringList crossCheckerWindow::getSelectionChildren()
+{
+    QTreeWidgetItem *item;
+    QStringList output;
+
+    if (crossCheckerWindow::clickedItem != 0){
+
+        for (int i = 0; i < crossCheckerWindow::clickedItem->childCount(); i++){
+            item = crossCheckerWindow::clickedItem->child(i);
+            output.append(item->text(0));
+
+        }
+    }
+
+    return output;
+}
+//----------------------------------------------------------------------------------------------------
+
 QString crossCheckerWindow::getTagFromUser()
 {
     QStringList tags;
@@ -169,30 +241,6 @@ void crossCheckerWindow::saveChecker()
     }else{
         statusBar()->showMessage(tr("Nothing saved."), 3000);
 
-    }
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::setHeaderFor(int tablePart)
-{
-    QStringList hBuff = getSelectionChildren();
-
-    if (hBuff.size() > 0){
-        table->cacheTable();
-
-        if(tablePart == crossCheckerWindow::rows){
-            table->rowHeaders = hBuff;
-            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
-
-        }else if(tablePart == crossCheckerWindow::columns){
-            table->columnHeaders = hBuff;
-            loadHeaderParent(tablePart, crossCheckerWindow::clickedItem->text(0));
-
-        }
-
-        resetCache();
-        table->loadFromCache();
-        hasChanges = true;
     }
 }
 //----------------------------------------------------------------------------------------------------
@@ -438,36 +486,6 @@ bool crossCheckerWindow::writeHtmlTo(QString filePath)
 }
 //----------------------------------------------------------------------------------------------------
 
-QStringList crossCheckerWindow::getSelectionChildren()
-{
-    QTreeWidgetItem *item;
-    QStringList output;
-
-    if (crossCheckerWindow::clickedItem != 0){
-
-        for (int i = 0; i < crossCheckerWindow::clickedItem->childCount(); i++){
-            item = crossCheckerWindow::clickedItem->child(i);
-            output.append(item->text(0));
-
-        }
-    }
-
-    return output;
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::pickColumnHeadersFromTree()
-{
-    setHeaderFor(crossCheckerWindow::columns);
-}
-//----------------------------------------------------------------------------------------------------
-
-void crossCheckerWindow::pickRowHeadersFromTree()
-{
-    setHeaderFor(crossCheckerWindow::rows);
-}
-//----------------------------------------------------------------------------------------------------
-
 void crossCheckerWindow::closeEvent(QCloseEvent *event)
 {
     bool doClose = false;
@@ -533,8 +551,12 @@ void crossCheckerWindow::createToolBar()
     tb->setMovable(false);
     tb->addAction(saveCheckerAction);
     tb->addAction(exportCheckerAction);
+    tb->addSeparator();
     tb->addAction(pickColumnHeadersAction);
     tb->addAction(pickRowHeadersAction);
+    tb->addAction(pickVariablesAction);
+    tb->addAction(addColumnAction);
+    tb->addSeparator();
     tb->addAction(coverAllAction);
     tb->addAction(coverSelectedAction);
     tb->addAction(moveColumnLeftAction);
@@ -607,6 +629,12 @@ void crossCheckerWindow::createActions()
     coverAllAction = new QAction(icons->coverIcon, tr("Cover all"),this);
     connect(coverAllAction,SIGNAL(triggered()),this,SLOT(coverAll()));
 
+    pickVariablesAction =  new QAction(QIcon(":/icons/pickVariablesIcon.png"), tr("Pick variables"),this);
+    connect(pickVariablesAction,SIGNAL(triggered()),this,SLOT(pickVariables()));
+
+    addColumnAction = new QAction(QIcon(":/icons/addColumnIcon.png"),tr("Add a column"),this);
+    connect(addColumnAction,SIGNAL(triggered()),this,SLOT(addColumn()));
+
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -623,10 +651,13 @@ void crossCheckerWindow::createMenus()
         variablesMenu->addAction(pickRowHeadersAction);
         variablesMenu->addAction(pickColumnHeadersAction);
         variablesMenu->addSeparator();
+        variablesMenu->addAction(pickVariablesAction);
+        variablesMenu->addSeparator();
         variablesMenu->addAction(coverAllAction);
         variablesMenu->addAction(coverSelectedAction);
 
     QMenu *columnsMenu = mb->addMenu(tr("Columns"));
+        columnsMenu->addAction(addColumnAction);
         columnsMenu->addAction(deleteSelectedColumnsAction);
         columnsMenu->addAction(moveColumnLeftAction);
         columnsMenu->addAction(moveColumnRightAction);

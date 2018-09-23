@@ -4,21 +4,21 @@
 #include <QObject>
 
 #define STRING_TESTCAD "testCAD"
-#define STRING_VERSION "Version:"
-#define STRING_VERSION_NUMBER "6.4.4"
+#define STRING_VERSION "Current version:"
+#define STRING_VERSION_NUMBER "6.4.5"
 #define STRING_AUTHORS "Bladimir de la Hoz Matveeva\r"
 
 #define STRING_HISTORY_FILE "testCAD.history"
 
 #define STRING_ABOUT_TESTCAD "About testCAD"
-#define ABOUT_TEXT "<b>testCAD</b> is a tool designed to solve the following problems:<ul>"\
+#define ABOUT_TEXT "<b>testCAD</b> is a Graphical Test Design tool to solve the following problems:<ul>"\
                      "<li>Hold composition information in a visually structured way.</li>"\
                      "<li>Quickly retrieve and add information to the stored structure.</li>"\
                      "<li>Keep track of the components status.</li>"\
                      "<li>Obtain statistical data from the stored information.</li>"\
                      "<li>Design tests visually from the stored information.</li>"\
                      "</ul><br><br>Author: Bladimir de la Hoz Matveeva."\
-                     "<br><br> "
+                     "<br><br><b>testCAD</b> has been developed using <b>Qt.</b><br><br>"
 
 #define STRING_OPEN_DIALOG_TITLE "Open testCAD File"
 #define STRING_FILETYPE_TESTCAD "testCAD Files (*.spec)"

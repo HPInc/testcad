@@ -33,6 +33,59 @@ dataTable::dataTable()
 }
 //----------------------------------------------------------------------------------------------------
 
+QList<QTreeWidgetItem*> dataTable::getVariableItemsFrom(QTreeWidgetItem *treeItem)
+{
+    QList<QTreeWidgetItem*> lastParents;
+    QList<QTreeWidgetItem*> lastPBuff;
+
+    if (treeItem->childCount() > 0){
+
+        for(int i = 0; i < treeItem->childCount(); i++){
+
+            if(isValidVariable(treeItem)){
+                lastParents.append(treeItem);
+                break;
+
+            }else{
+                lastPBuff = getVariableItemsFrom(treeItem->child(i));
+
+            }
+
+            for (int n = 0; n < lastPBuff.count(); n++){
+                lastParents.append(lastPBuff.at(n));
+
+            }
+        }
+    }
+
+    return lastParents;
+}
+//----------------------------------------------------------------------------------------------------
+
+bool dataTable::isValidVariable(QTreeWidgetItem *treeItem)
+{
+    bool isValid = true;
+
+    if(treeItem->childCount() > 1){//A valid variable must have more than one possible value otherwise it is a constant !
+
+        for(int i = 0; i < treeItem->childCount(); i++){
+
+            if (treeItem->child(i)->childCount() > 0){//A value cannot have children (values) only variables may have children.
+                isValid = false;
+                break;
+
+            }
+        }
+
+    }else{
+       isValid = false;
+
+    }
+
+    return isValid;
+}
+//----------------------------------------------------------------------------------------------------
+
 void dataTable::deleteSelectedRows()
 {
     cacheTable();
@@ -317,59 +370,6 @@ void dataTable::loadFromItem(QTreeWidgetItem *treeItem)
         setColumnHeaders(columnHeaders);
         update();
     }
-}
-//----------------------------------------------------------------------------------------------------
-
-QList<QTreeWidgetItem*> dataTable::getVariableItemsFrom(QTreeWidgetItem *treeItem)
-{
-    QList<QTreeWidgetItem*> lastParents;
-    QList<QTreeWidgetItem*> lastPBuff;
-
-    if (treeItem->childCount() > 1){
-
-        for(int i = 0; i < treeItem->childCount(); i++){
-
-            if(isValidVariable(treeItem)){
-                lastParents.append(treeItem);
-                break;
-
-            }else{
-                lastPBuff = getVariableItemsFrom(treeItem->child(i));
-
-            }
-
-            for (int n = 0; n < lastPBuff.count(); n++){
-                lastParents.append(lastPBuff.at(n));
-
-            }
-        }
-    }
-
-    return lastParents;
-}
-//----------------------------------------------------------------------------------------------------
-
-bool dataTable::isValidVariable(QTreeWidgetItem *treeItem)
-{
-    bool isValid = true;
-
-    if(treeItem->childCount()>1){
-
-        for(int i = 0; i < treeItem->childCount(); i++){
-
-            if (treeItem->child(i)->childCount() > 0){
-                isValid = false;
-                break;
-
-            }
-        }
-
-    }else{
-       isValid = false;
-
-    }
-
-    return isValid;
 }
 //----------------------------------------------------------------------------------------------------
 

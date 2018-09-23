@@ -27,7 +27,7 @@
 
 #include "statsWindow/statsWindow.h"
 
-statsWindow::statsWindow(QWidget *parent, QList<statistics> *treeStatistics) : QMainWindow(parent)
+statsWindow::statsWindow(QWidget *parent, QTreeWidget *tree) : QMainWindow(parent)
 {
     table = new dataTable();
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -35,60 +35,106 @@ statsWindow::statsWindow(QWidget *parent, QList<statistics> *treeStatistics) : Q
     this->setWindowTitle(tr("System Statistics"));
     this->setMinimumSize(500,500);
     this->setAttribute(Qt::WA_DeleteOnClose);
+
     createActions();
     createMenus();
     createToolBar();
-    statusBar()->show();
-    loadStatistics(treeStatistics);
+
+    this->tree = tree;
+
+    if(tree != 0){
+        loadTable();
+        statusBar()->show();
+
+    }
+
+    statsWindow::instance = 1;
 
 }
 //----------------------------------------------------------------------------------------------------
 
-void statsWindow::moveRowUp()
+QList<statistics> statsWindow::getStatistics()
 {
-    table->moveRowUp();
+    int sumOfChildren;
+    int pendingCount;
+    int plannedCount;
+    int reviewCount;
+    int validatedCount;
+    int failedCount;
+    int unsupportedCount;
+    variableStatistics vStats;
+    treeItemChildrenCount itemsCounted;
+    QList<statistics> ts;
+
+    for(int i = 0; i< tree->topLevelItemCount(); i++){
+        statistics statBuff;
+        statBuff.componentName = tree->topLevelItem(i)->text(0);
+        itemsCounted = childrenCountOf(tree->topLevelItem(i));
+        sumOfChildren = itemsCounted.modulesCount + itemsCounted.entriesCount;
+        pendingCount = countOf(tree->topLevelItem(i),STRING_STATUS_PENDING);
+        plannedCount = countOf(tree->topLevelItem(i),STRING_STATUS_PLANNED);
+        reviewCount = countOf(tree->topLevelItem(i),STRING_STATUS_REVIEW);
+        validatedCount = countOf(tree->topLevelItem(i),STRING_STATUS_VALIDATED);
+        failedCount = countOf(tree->topLevelItem(i),STRING_STATUS_FAILED);
+        unsupportedCount = countOf(tree->topLevelItem(i),STRING_STATUS_UNSUPPORTED);
+
+        statBuff.modulesCount = QString::number(itemsCounted.modulesCount);
+        statBuff.entriesCount = QString::number(itemsCounted.entriesCount);
+
+        statBuff.pending = QString::number(pendingCount);
+        statBuff.pendingPercent = percentOf(pendingCount, sumOfChildren);
+        statBuff.planned = QString::number(plannedCount);
+        statBuff.plannedPercent = percentOf(plannedCount, sumOfChildren);
+        statBuff.review = QString::number(reviewCount);
+        statBuff.reviewPercent = percentOf(reviewCount, sumOfChildren);
+        statBuff.validated = QString::number(validatedCount);
+        statBuff.validatedPercent = percentOf(validatedCount, sumOfChildren);
+        statBuff.failed = QString::number(failedCount);
+        statBuff.failedPercent = percentOf(failedCount, sumOfChildren);
+        statBuff.unsupported = QString::number(unsupportedCount);
+        statBuff.unsupportedPercent = percentOf(unsupportedCount, sumOfChildren);
+
+        vStats = getVariableStatistics(tree->topLevelItem(i));
+        statBuff.variablesCount = QString::number(vStats.variablesCount);
+        statBuff.fullCombinationSize = QString::number(vStats.possibleCombinations);
+
+        ts.append(statBuff);
+    }
+
+    return ts;
+
 }
 //----------------------------------------------------------------------------------------------------
 
-void statsWindow::moveRowDown()
-{
-    table->moveRowDown();
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::deleteSelectedRows()
-{
-    table->deleteSelectedRows();
-}
-//----------------------------------------------------------------------------------------------------
-
-void statsWindow::loadStatistics(QList<statistics> *treeStatistics)
+void statsWindow::loadTable()
 {
     QList<QStringList> valuesByRow;
     QStringList rowVals;
     int colCount;
+    QList<statistics> treeStatistics = getStatistics();
 
     setStatsHeaders();
     table->rowHeaders.clear();
 
-    for (int i = 0; i < treeStatistics->size(); i++){
-        table->rowHeaders.append(treeStatistics->at(i).componentName);
-        rowVals.append(treeStatistics->at(i).variablesCount);
-        rowVals.append(treeStatistics->at(i).fullCombinationSize);
-        rowVals.append(treeStatistics->at(i).pending);
-        rowVals.append(treeStatistics->at(i).pendingPercent);
-        rowVals.append(treeStatistics->at(i).planned);
-        rowVals.append(treeStatistics->at(i).plannedPercent);
-        rowVals.append(treeStatistics->at(i).review);
-        rowVals.append(treeStatistics->at(i).reviewPercent);
-        rowVals.append(treeStatistics->at(i).validated);
-        rowVals.append(treeStatistics->at(i).validatedPercent);
-        rowVals.append(treeStatistics->at(i).failed);
-        rowVals.append(treeStatistics->at(i).failedPercent);
-        rowVals.append(treeStatistics->at(i).unsupported);
-        rowVals.append(treeStatistics->at(i).unsupportedPercent);
-        rowVals.append(treeStatistics->at(i).modulesCount);
-        rowVals.append(treeStatistics->at(i).entriesCount);
+    for (int i = 0; i < treeStatistics.size(); i++){
+        table->rowHeaders.append(treeStatistics.at(i).componentName);
+
+        rowVals.append(treeStatistics.at(i).variablesCount);
+        rowVals.append(treeStatistics.at(i).fullCombinationSize);
+        rowVals.append(treeStatistics.at(i).pending);
+        rowVals.append(treeStatistics.at(i).pendingPercent);
+        rowVals.append(treeStatistics.at(i).planned);
+        rowVals.append(treeStatistics.at(i).plannedPercent);
+        rowVals.append(treeStatistics.at(i).review);
+        rowVals.append(treeStatistics.at(i).reviewPercent);
+        rowVals.append(treeStatistics.at(i).validated);
+        rowVals.append(treeStatistics.at(i).validatedPercent);
+        rowVals.append(treeStatistics.at(i).failed);
+        rowVals.append(treeStatistics.at(i).failedPercent);
+        rowVals.append(treeStatistics.at(i).unsupported);
+        rowVals.append(treeStatistics.at(i).unsupportedPercent);
+        rowVals.append(treeStatistics.at(i).modulesCount);
+        rowVals.append(treeStatistics.at(i).entriesCount);
 
         colCount = rowVals.size();
         valuesByRow.append(rowVals);
@@ -113,6 +159,134 @@ void statsWindow::loadStatistics(QList<statistics> *treeStatistics)
 
     table->loadFromCache();
 
+}
+//----------------------------------------------------------------------------------------------------
+
+variableStatistics statsWindow::getVariableStatistics(QTreeWidgetItem *treeItem)
+{
+    variableStatistics output;
+    QString varTree = "";
+    long variablesCount;
+    long valuesCount = 0;
+    long highestValCount = 0;
+    double possibleCombinations = 1;
+    int valuesBuffer;
+
+    if (treeItem != 0){
+        QList<QTreeWidgetItem*> itemsList = table->getVariableItemsFrom(treeItem);
+        QTreeWidgetItem *item;
+        variablesCount = itemsList.count();
+
+        for (int i=0; i < itemsList.count(); i++){
+            valuesBuffer = 0;
+            item = itemsList.at(i);
+            output.variables.append(item->text(0));
+
+            varTree = varTree + item->text(0) + "\n";
+
+            for (int n=0; n < item->childCount(); n++){
+                varTree = varTree + "\t" + item->child(n)->text(0) + "\n";
+                valuesCount++;
+                valuesBuffer++;
+
+                if(valuesBuffer > highestValCount){
+                    highestValCount = valuesBuffer;
+
+                }
+
+            }
+
+            possibleCombinations = possibleCombinations * valuesBuffer;
+
+        }
+
+        output.variablesCount=variablesCount;
+        output.valuesCount = valuesCount;
+        output.higherValuesCount = highestValCount;
+        output.possibleCombinations = possibleCombinations;
+        output.variablesTree = varTree;
+
+     }
+
+    return output;
+
+}
+//----------------------------------------------------------------------------------------------------
+
+treeItemChildrenCount statsWindow::childrenCountOf(QTreeWidgetItem *treeItem)
+{
+    treeItemChildrenCount itCount;
+
+    for(int i = 0; i < treeItem->childCount(); i++){
+        if (treeItem->child(i)->data(0, Qt::UserRole) == TAG_TYPE_MODULE){
+            itCount.modulesCount++;
+
+        }else if(treeItem->child(i)->data(0, Qt::UserRole) == TAG_TYPE_ENTRY){
+            itCount.entriesCount++;
+
+        }
+
+        treeItemChildrenCount buff = childrenCountOf(treeItem->child(i));
+        itCount.modulesCount = itCount.modulesCount + buff.modulesCount;
+        itCount.entriesCount = itCount.entriesCount + buff.entriesCount;
+    }
+
+    return itCount;
+}
+//----------------------------------------------------------------------------------------------------
+
+int statsWindow::countOf(QTreeWidgetItem *treeItem, QString status)
+{
+    int itemCount = 0;
+
+    for(int i = 0; i < treeItem->childCount(); i++){
+        if (!status.isEmpty()){
+
+            if (treeItem->child(i)->data(1, Qt::UserRole) == status){
+                itemCount++;
+
+            }
+
+        }else{
+            itemCount++;
+
+        }
+
+        itemCount = itemCount + countOf(treeItem->child(i),status);
+    }
+
+    return itemCount;
+}
+//----------------------------------------------------------------------------------------------------
+
+QString statsWindow::percentOf(int count, int fromTotal)
+{
+    double percent = 0;
+    QString output = "%1 %";
+
+    if (fromTotal > 0){
+        percent = (double)count/(double)fromTotal * 100;
+    }
+
+    return output.arg(percent,1,'f',1);
+}
+//----------------------------------------------------------------------------------------------------
+
+void statsWindow::moveRowUp()
+{
+    table->moveRowUp();
+}
+//----------------------------------------------------------------------------------------------------
+
+void statsWindow::moveRowDown()
+{
+    table->moveRowDown();
+}
+//----------------------------------------------------------------------------------------------------
+
+void statsWindow::deleteSelectedRows()
+{
+    table->deleteSelectedRows();
 }
 //----------------------------------------------------------------------------------------------------
 
