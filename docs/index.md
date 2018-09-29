@@ -11,7 +11,7 @@ layout: default
 ### 1. Download testCAD 6.4.6
 
 
-[![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.4.5.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.4.6.zip)
+[![Windows](./assets/images/windows.png)](./bin/windows/testCAD32.6.4.6.zip)![spacer](./assets/images/spacer.png)[![Linux](./assets/images/linux.png)](./bin/linux/testCAD64.6.4.6.zip)
 
 
 ### 2. Picture your system
