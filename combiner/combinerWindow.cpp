@@ -54,6 +54,45 @@ combinerWindow::combinerWindow(QWidget *parent, QTreeWidgetItem *testItem) : QMa
 }
 //----------------------------------------------------------------------------------------------------
 
+void combinerWindow::appendTable()
+{
+    if ((combinerWindow::clickedItem) &&
+        (combinerWindow::clickedItem->data(0,Qt::UserRole).toString()==TAG_TYPE_TEST_COMBINATION)){
+        table->cacheTable();
+        dataTable *tableToAppend = new dataTable();
+        tableToAppend->loadFromData(combinerWindow::clickedItem->data(2,Qt::UserRole).toList());
+
+        if(tableToAppend->columnsCache.size() == table->columnsCache.size()){
+            int rowCount = tableToAppend->columnsCache.at(0).size();
+
+            for (int n = 0; n < table->columnsCache.size(); n++){
+                QStringList fromBuff = tableToAppend->columnsCache.at(n);
+                QStringList toBuff = table->columnsCache.at(n);
+
+                for (int m = 0; m < rowCount; m++){
+                    toBuff.append(fromBuff.at(m));
+                }
+
+                table->columnsCache.replace(n, toBuff);
+            }
+
+            table->loadFromCache();
+            hasChanges = true;
+
+        }else{
+            QMessageBox msg(QMessageBox::Critical, tr("Appending table"), tr("Table to append doesn't match destination table size."), QMessageBox::Ok);
+            msg.exec();
+        }
+
+        delete tableToAppend;
+
+    }else{
+        QMessageBox msg(QMessageBox::Critical, tr("Appending table"), tr("Please select a combination table."), QMessageBox::Ok);
+        msg.exec();
+    }
+}
+//----------------------------------------------------------------------------------------------------
+
 void combinerWindow::clearTable()
 {
     table->clear();
@@ -530,6 +569,7 @@ void combinerWindow::createToolBar()
     tb->addSeparator();
     tb->addAction(andAction);
     tb->addAction(removeCoveredAction);
+    tb->addAction(appendTableAction);
     tb->addSeparator();
     tb->addAction(moveColumnLeftAction);
     tb->addAction(moveColumnRightAction);
@@ -659,6 +699,9 @@ void combinerWindow::createActions()
 
     removeCoveredAction = new QAction(QIcon(":/icons/nandIcon.png"), tr("Remove covered"),this);
     connect(removeCoveredAction,SIGNAL(triggered()),this,SLOT(removeCovered()));
+
+    appendTableAction = new QAction(QIcon(":/icons/orIcon.png"), tr("Append table"),this);
+    connect(appendTableAction,SIGNAL(triggered()),this,SLOT(appendTable()));
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -680,6 +723,8 @@ void combinerWindow::createMenus()
         variablesMenu->addAction(randomizeAction);
         variablesMenu->addAction(andAction);
         variablesMenu->addAction(removeCoveredAction);
+        variablesMenu->addSeparator();
+        variablesMenu->addAction(appendTableAction);
 
     QMenu *columnsMenu = mb->addMenu(tr("Columns"));
         columnsMenu->addAction(deleteSelectedColumnsAction);

@@ -74,5 +74,6 @@
         <file>icons/nandIcon.png</file>
         <file>icons/appIcon.ico</file>
         <file>icons/pickVariablesIcon.png</file>
+        <file>icons/orIcon.png</file>
     </qresource>
 </RCC>

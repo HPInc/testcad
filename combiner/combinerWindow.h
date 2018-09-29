@@ -102,6 +102,7 @@ public:
     QAction *shiftDownAction;
     QAction *saveCombinationAction;
     QAction *showHelpAction;
+    QAction *appendTableAction;
 
     QTreeWidgetItem *activeTestItem;
     static QTreeWidgetItem *clickedItem;
@@ -130,6 +131,7 @@ public slots:
     void showHelp();
     void shiftSelectedUp();
     void shiftSelectedDown();
+    void appendTable();
 
 };
 
