@@ -171,6 +171,7 @@ variableStatistics statsWindow::getVariableStatistics(QTreeWidgetItem *treeItem)
     long highestValCount = 0;
     double possibleCombinations = 1;
     int valuesBuffer;
+    QString varNameBuff;
 
     if (treeItem != 0){
         QList<QTreeWidgetItem*> itemsList = table->getVariableItemsFrom(treeItem);
@@ -180,8 +181,13 @@ variableStatistics statsWindow::getVariableStatistics(QTreeWidgetItem *treeItem)
         for (int i=0; i < itemsList.count(); i++){
             valuesBuffer = 0;
             item = itemsList.at(i);
-            output.variables.append(item->text(0));
+            varNameBuff="";
 
+            if (item->parent()!=0)
+                varNameBuff = item->parent()->text(0) + "::";
+
+            varNameBuff = varNameBuff + item->text(0);
+            output.variables.append(varNameBuff);
             varTree = varTree + item->text(0) + "\n";
 
             for (int n=0; n < item->childCount(); n++){
@@ -200,7 +206,7 @@ variableStatistics statsWindow::getVariableStatistics(QTreeWidgetItem *treeItem)
 
         }
 
-        output.variablesCount=variablesCount;
+        output.variablesCount = variablesCount;
         output.valuesCount = valuesCount;
         output.higherValuesCount = highestValCount;
         output.possibleCombinations = possibleCombinations;
