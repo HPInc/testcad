@@ -6,7 +6,7 @@ layout: default
 
 (_ISTQB Syllabus_).
 
-#### Do you share our [vision ?](https://www.istqb.org/about-as/vision-mission.html)
+#### Do you share [this vision ?](https://www.istqb.org/about-as/vision-mission.html)
 
 ### 1. Download testCAD 6.4.8
 
@@ -16,21 +16,23 @@ layout: default
 
 ### 2. Picture your system
 
+(Find the **example.spec** inside the **example** folder of the downloaded **.zip**)
+
 - Component (Part of your system)
   - Module (Menu entry)
-    - Module (Sub Menu entry)
-      - Element (Option)
-      - Element (Option)
-      - Element (Option)
-    - Module (Sub Menu entry)
-      - Element (Option)
-      - Element (Option)
-      - Element (Option)
+    - Module (Sub Menu entry _or test Variable_)
+      - Element (Option _or test Value_)
+      - Element (Option _or test Value_)
+      - Element (Option _or test Value_)
+    - Module (Sub Menu entry _or test Variable_)
+      - Element (Option _or test Value_)
+      - Element (Option _or test Value_)
+      - Element (Option _or test Value_)
 
-### 3. Explore it
-Once you have a picture of your system, it is easy use the system hierarchical tree to make exploratory charters.
+### 3. Explore and track your system
+It is easy use the system hierarchical tree to make exploratory charters and extract variables to create _test Combinations_
 
-Scan to spot:
+Keep your tree up to date to spot:
 
 *   Pending.
 *   Validated.
