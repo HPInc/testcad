@@ -580,7 +580,17 @@ void crossCheckerWindow::deleteSelectedColumns()
 
 void crossCheckerWindow::showHelp()
 {
-    QMessageBox::about(this,tr("Cross checker"), tr("Help"));
+    QMessageBox::about(this,tr("Cross checker"), tr("The <b>cross checker</b> window allows you to cross relate values."\
+                                                    "You can pick variables from clicked items in the tree and arrange them "\
+                                                    "as headers for rows and column headers acting as coordinates for the values you "\
+                                                    "enter in each cell."\
+                                                    "You can also just pick variables and add columns manually to cross relate with "\
+                                                    "values you choose for each column. This is useful for creating <b>Traceability matrixes</b>."\
+                                                    "<br><br><b>Example:</b>"\
+                                                    "<br><br>  1. Click a item in the tree."\
+                                                     "<br>  2. Click Variables and select <b>Pick variables</b> option."\
+                                                     "<br>  3. Click Add Column icon to add a column and give it a name."\
+                                                     "<br>  4. Repeat the step 3 for as many columns you need to add."));
 
 }
 //----------------------------------------------------------------------------------------------------

@@ -75,5 +75,6 @@
         <file>icons/appIcon.ico</file>
         <file>icons/pickVariablesIcon.png</file>
         <file>icons/orIcon.png</file>
+        <file>icons/testCADIcon.png</file>
     </qresource>
 </RCC>

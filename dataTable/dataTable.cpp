@@ -251,8 +251,12 @@ void dataTable::addColumn()
         }else{
             cacheTable();
             columnHeaders.append(headerText);
+
             QStringList newColBuff;
-            newColBuff.append("");
+
+            for (int i = 0; i < rowHeaders.size(); i++)
+                newColBuff.append("");
+
             columnsCache.append(newColBuff);
             loadFromCache();
         }

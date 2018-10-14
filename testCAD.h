@@ -5,7 +5,7 @@
 
 #define STRING_TESTCAD "testCAD"
 #define STRING_VERSION "Current version:"
-#define STRING_VERSION_NUMBER "6.4.7"
+#define STRING_VERSION_NUMBER "6.4.8"
 #define STRING_AUTHORS "Bladimir de la Hoz Matveeva\r"
 
 #define STRING_HISTORY_FILE "testCAD.history"
@@ -153,16 +153,6 @@
 #define STRING_ACTION_MOVE_RIGHT "Move right"
 
 #define STRING_COMBINATIONS_COUNT " Resulting combinations..."
-
-#define STRING_COMBINER_HELP "The <b>combiner</b> window allows you to pick variables from clicked items "\
-                     "in the tree so that you can collect variables in columns. Then you can select "\
-                     "columns to combine or randomize their values."\
-                     "<br><br><b>Example:</b>"\
-                     "<br><br>  1. Click a item in the tree."\
-                      "<br>  2. Click Variables and select <b>Pick variables</b> option."\
-                      "<br>  3. Repeat steps above to populate your table with variables form the tree."\
-                      "<br>  4. Click a column (hold Control key to select multiple columns)."\
-                      "<br>  5. Click Variables and select <b>Combine</b> or <b>Randomize</b>."
 
 #define TAG_TYPE_TEST_COMBINATION "combination"
 #define TAG_TYPE_TEST_COMBINATION_COLUMN "combinationColumn"

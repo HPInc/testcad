@@ -4,6 +4,8 @@
 
 MainWindow::MainWindow()
 {
+    this->setWindowIcon(QIcon(":/icons/testCADIcon.png"));
+
     QStringList labels;
     labels << tr(STRING_COMPONENTS) << "  ≠" << tr(STRING_COMMENTS);
 

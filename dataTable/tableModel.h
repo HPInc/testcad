@@ -49,6 +49,7 @@ public:
 private:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex &index, const QVariant &value, int role);
+    bool isValidIndex(const QModelIndex &index) const;
 
 };
 

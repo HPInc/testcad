@@ -184,7 +184,7 @@ variableStatistics statsWindow::getVariableStatistics(QTreeWidgetItem *treeItem)
             varNameBuff="";
 
             if (item->parent()!=0)
-                varNameBuff = item->parent()->text(0) + "::";
+                varNameBuff = item->parent()->text(0) + " :: ";
 
             varNameBuff = varNameBuff + item->text(0);
             output.variables.append(varNameBuff);

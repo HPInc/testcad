@@ -639,7 +639,15 @@ void combinerWindow::saveCombination()
 
 void combinerWindow::showHelp()
 {
-    QMessageBox::about(this,tr(STRING_COMBINER), tr(STRING_COMBINER_HELP));
+    QMessageBox::about(this,tr("Combiner"), tr("The <b>combiner</b> window allows you to pick variables from clicked items "\
+                                                    "in the tree so that you can collect variables in columns. Then you can select "\
+                                                    "columns to combine or randomize their values."\
+                                                    "<br><br><b>Example:</b>"\
+                                                    "<br><br>  1. Click a item in the tree."\
+                                                     "<br>  2. Click Variables and select <b>Pick variables</b> option."\
+                                                     "<br>  3. Repeat steps above to populate your table with variables form the tree."\
+                                                     "<br>  4. Click a column (hold Control key to select multiple columns)."\
+                                                     "<br>  5. Click Variables and select <b>Combine</b> or <b>Randomize</b>."));
 
 }
 //----------------------------------------------------------------------------------------------------

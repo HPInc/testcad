@@ -35,31 +35,45 @@ tableModel::tableModel()
 
 QVariant tableModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
 
-    if (index.column() >=  valuesByColumn.size() || index.row() >=  valuesByColumn.at(index.column()).size() || index.row() < 0)
-        return QVariant();
+    if (isValidIndex(index)){
 
-    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        QStringList sl  = valuesByColumn.at(index.column());
-        return sl.at(index.row());
+        if (role == Qt::DisplayRole || role == Qt::EditRole) {
+            QStringList sl  = valuesByColumn.at(index.column());
+            return sl.at(index.row());
+
+        }
+
+        if (role == Qt::BackgroundRole) {
+
+            if (backgroundColorByColumn.size() > 0 &&
+                    index.column() <=  backgroundColorByColumn.size()-1 &&
+                    index.row() <=  backgroundColorByColumn.at(index.column()).size()-1){
+
+                QList< QColor > colors = backgroundColorByColumn.at(index.column());
+                return colors.at(index.row());
+
+            }
+         }
 
     }
 
-    if (role == Qt::BackgroundRole) {
-
-        if (backgroundColorByColumn.size() > 0 &&
-                index.column() <=  backgroundColorByColumn.size()-1 &&
-                index.row() <=  backgroundColorByColumn.at(index.column()).size()-1){
-
-            QList< QColor > colors = backgroundColorByColumn.at(index.column());
-            return colors.at(index.row());
-
-        }
-     }
-
     return QVariant();
+
+}
+//----------------------------------------------------------------------------------------------------
+
+bool tableModel::isValidIndex(const QModelIndex &index) const
+{
+    if (!index.isValid() ||
+        index.column() >=  valuesByColumn.size() ||
+            index.row() >=  valuesByColumn.at(index.column()).size() ||
+            index.row() < 0){
+        return false;
+
+    }else{
+        return true;
+    }
 }
 //----------------------------------------------------------------------------------------------------
 
@@ -93,20 +107,26 @@ bool tableModel::setData(const QModelIndex &index, const QVariant &value, int ro
 
 QVariant tableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role != Qt::DisplayRole)
-        return QVariant();
 
-    if (orientation == Qt::Horizontal) {
-        return columnHeaders.at(section);
+    if (role == Qt::DisplayRole){
 
-    }else if(orientation == Qt::Vertical){
+        if (orientation == Qt::Horizontal) {
+            return columnHeaders.at(section);
 
-        if (section < rowHeaders.size()){
-            return rowHeaders.at(section);
+        }else if(orientation == Qt::Vertical){
+
+            if (section < rowHeaders.size()){
+                return rowHeaders.at(section);
+
+            }
+
+            return QString::number(section + 1);
 
         }
+    }
 
-        return QString::number(section + 1);
+    if ((role == Qt::TextAlignmentRole) && (orientation == Qt::Vertical)){
+        return Qt::AlignRight;
 
     }
 
